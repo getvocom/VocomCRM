@@ -37,7 +37,12 @@ export const STATUS_COLORS: Record<string, string> = {
   // 'Other' already defined above (from LeadSource) — Region's 'Other' reuses it
   // Division (deals.division)
   'Vocom International': 'bg-blue-100 text-blue-700',
-  'Vocom AI': 'bg-purple-100 text-purple-700'
+  'Vocom AI': 'bg-purple-100 text-purple-700',
+  // Lead phase (website_leads.phase)
+  Unassigned: 'bg-neutral-100 text-neutral-500',
+  'Rep Assigned': 'bg-blue-100 text-blue-700',
+  'Cynthia Follow-up': 'bg-purple-100 text-purple-700',
+  'Escalated to Cold Call': 'bg-red-100 text-red-700'
 };
 
 export function StatusSelect({

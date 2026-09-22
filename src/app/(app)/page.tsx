@@ -19,6 +19,7 @@ export default async function DashboardPage() {
 
   const [
     { count: websiteCount },
+    { count: linkedinOutreachCount },
     { count: instantlyCount },
     { count: linkedinCount },
     { count: interestedCount },
@@ -31,7 +32,11 @@ export default async function DashboardPage() {
     { data: linkedinActivityRows },
     ...interestCounts
   ] = await Promise.all([
-    supabase.from('website_leads').select('*', { count: 'exact', head: true }),
+    supabase
+      .from('website_leads')
+      .select('*', { count: 'exact', head: true })
+      .in('source', ['Website', 'Offline Event', 'Other']),
+    supabase.from('website_leads').select('*', { count: 'exact', head: true }).eq('source', 'LinkedIn'),
     supabase.from('instantly_leads').select('*', { count: 'exact', head: true }),
     supabase.from('linkedin_activity').select('*', { count: 'exact', head: true }),
     supabase
@@ -49,7 +54,7 @@ export default async function DashboardPage() {
       .select('*', { count: 'exact', head: true })
       .not('status', 'in', '("Resolved","Won\'t Fix")'),
     supabase.from('instantly_leads').select('last_reply_at').not('last_reply_at', 'is', null),
-    supabase.from('website_leads').select('created_at'),
+    supabase.from('website_leads').select('created_at').in('source', ['Website', 'Offline Event', 'Other']),
     supabase.from('linkedin_activity').select('activity'),
     ...INTEREST_LABELS.map((label) =>
       supabase

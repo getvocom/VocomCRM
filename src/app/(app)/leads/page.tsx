@@ -19,6 +19,7 @@ export default async function LeadsPage() {
     supabase
       .from('website_leads')
       .select('*')
+      .in('source', ['Website', 'Offline Event', 'Other'])
       .order('created_at', { ascending: false })
       .returns<Lead[]>(),
     supabase.from('reps').select('*').order('name').returns<Rep[]>(),
@@ -37,8 +38,9 @@ export default async function LeadsPage() {
     <div>
       <h1 className="mb-1 text-xl font-semibold text-neutral-900">Leads</h1>
       <p className="mb-6 text-sm text-neutral-500">
-        Every lead in the pipeline — from the website contact form, offline events,
-        referrals, or research — in one place.
+        The leads that need to be actively managed — website contact form and offline
+        event leads. Referrals, Research, and LinkedIn Outreach each have their own page
+        now (Sales → Referrals / Research, Marketing → LinkedIn Outreach).
       </p>
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">

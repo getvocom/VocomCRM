@@ -5,10 +5,11 @@ import { useTransition } from 'react';
 import { deleteLead, updateLead } from '@/app/actions';
 import { DealSelect } from '@/components/deal-select';
 import { DeleteButton } from '@/components/delete-button';
+import { HotFlagButton } from '@/components/hot-flag-button';
 import { NotesButton } from '@/components/notes-button';
 import { RepSelect } from '@/components/rep-select';
 import { StatusSelect } from '@/components/status-select';
-import { LEAD_PRIORITIES, LEAD_SOURCES, type Deal, type Lead, type Rep } from '@/lib/types';
+import { LEAD_PHASES, LEAD_PRIORITIES, LEAD_SOURCES, type Deal, type Lead, type Rep } from '@/lib/types';
 import { useHighlightRow } from '@/lib/use-highlight-row';
 
 function Cell({
@@ -93,6 +94,7 @@ export function LeadsTable({
       <table className="w-full text-left text-sm">
         <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
           <tr>
+            <th className="px-2 py-3 font-medium"></th>
             <th className="px-4 py-3 font-medium">Date</th>
             <th className="px-4 py-3 font-medium">Name</th>
             <th className="px-4 py-3 font-medium">Job Title</th>
@@ -106,6 +108,7 @@ export function LeadsTable({
             <th className="px-4 py-3 font-medium">Company Size</th>
             <th className="px-4 py-3 font-medium">Use Case</th>
             <th className="px-4 py-3 font-medium">Assigned Rep</th>
+            <th className="px-4 py-3 font-medium">Phase</th>
             <th className="px-4 py-3 font-medium">Status</th>
             <th className="px-4 py-3 font-medium"></th>
           </tr>
@@ -113,6 +116,9 @@ export function LeadsTable({
         <tbody className="divide-y divide-neutral-100">
           {leads.map((lead) => (
             <tr key={lead.id} {...rowProps(lead.id)}>
+              <td className="px-2 py-3">
+                <HotFlagButton hot={lead.hot} onToggle={(hot) => updateLead(lead.id, { hot })} />
+              </td>
               <td className="whitespace-nowrap px-4 py-3 text-neutral-500">
                 {new Date(lead.created_at).toLocaleDateString()}
               </td>
@@ -171,6 +177,15 @@ export function LeadsTable({
                   reps={reps}
                   value={lead.assigned_rep_id}
                   onChange={(repId) => updateLead(lead.id, { assigned_rep_id: repId })}
+                />
+              </td>
+              <td className="px-4 py-3">
+                <StatusSelect
+                  options={['Unassigned', ...LEAD_PHASES]}
+                  value={lead.phase ?? 'Unassigned'}
+                  onChange={(phase) =>
+                    updateLead(lead.id, { phase: phase === 'Unassigned' ? null : (phase as Lead['phase']) })
+                  }
                 />
               </td>
               <td className="px-4 py-3">

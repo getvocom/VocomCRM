@@ -1,12 +1,14 @@
 export type LeadStatus = 'New' | 'Contacted' | 'Qualified' | 'Won' | 'Lost';
 export type LeadSource = 'Website' | 'Offline Event' | 'Referral' | 'Research' | 'LinkedIn' | 'Other';
 export type LeadPriority = 'Low' | 'Medium' | 'High';
+export type LeadPhase = 'Rep Assigned' | 'Cynthia Follow-up' | 'Escalated to Cold Call';
 export type DealStatus = 'Prospecting' | 'Connected' | 'Conversation' | 'Meeting' | 'Won' | 'Lost';
 export type LinkedInActivityType = 'Follow' | 'Visit' | 'Like';
 
 export const LEAD_STATUSES: LeadStatus[] = ['New', 'Contacted', 'Qualified', 'Won', 'Lost'];
 export const LEAD_SOURCES: LeadSource[] = ['Website', 'Offline Event', 'Referral', 'Research', 'LinkedIn', 'Other'];
 export const LEAD_PRIORITIES: LeadPriority[] = ['Low', 'Medium', 'High'];
+export const LEAD_PHASES: LeadPhase[] = ['Rep Assigned', 'Cynthia Follow-up', 'Escalated to Cold Call'];
 export const DEAL_STATUSES: DealStatus[] = [
   'Prospecting',
   'Connected',
@@ -59,6 +61,8 @@ export interface Lead {
   contacted_date: string | null;
   notes: string | null;
   deal_id: string | null;
+  hot: boolean;
+  phase: LeadPhase | null;
 }
 
 export interface Account {

@@ -7,6 +7,7 @@ import type {
   DealPipelineStatus,
   DealStatus,
   FeedbackStatus,
+  LeadPhase,
   LeadPriority,
   LeadSource,
   LeadStatus,
@@ -66,6 +67,8 @@ export async function updateLead(
     notes: string;
     contacted_date: string | null;
     deal_id: string | null;
+    hot: boolean;
+    phase: LeadPhase | null;
   }>
 ) {
   const supabase = await createClient();
@@ -86,6 +89,9 @@ export async function updateLead(
     );
   }
   revalidatePath('/leads');
+  revalidatePath('/linkedin-outreach');
+  revalidatePath('/referrals');
+  revalidatePath('/research');
 }
 
 export async function updateInstantlyLead(
@@ -165,6 +171,9 @@ export async function deleteLead(id: string) {
   const supabase = await createClient();
   await supabase.from('website_leads').delete().eq('id', id);
   revalidatePath('/leads');
+  revalidatePath('/linkedin-outreach');
+  revalidatePath('/referrals');
+  revalidatePath('/research');
 }
 
 export async function deleteInstantlyLead(id: string) {
