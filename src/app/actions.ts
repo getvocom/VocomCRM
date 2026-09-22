@@ -49,6 +49,24 @@ async function notifyAssignment(
   });
 }
 
+export async function addLead(formData: FormData) {
+  const supabase = await createClient();
+  const name = ((formData.get('name') as string) || '').trim() || null;
+  const company = ((formData.get('company') as string) || '').trim() || null;
+  if (!name && !company) return;
+
+  const email = ((formData.get('email') as string) || '').trim() || null;
+  const phone = ((formData.get('phone') as string) || '').trim() || null;
+  const job_title = ((formData.get('job_title') as string) || '').trim() || null;
+  const source = ((formData.get('source') as string) || 'Other') as LeadSource;
+
+  await supabase.from('website_leads').insert({ name, email, phone, job_title, company, source, status: 'New' });
+  revalidatePath('/leads');
+  revalidatePath('/referrals');
+  revalidatePath('/research');
+  revalidatePath('/linkedin-outreach');
+}
+
 export async function updateLead(
   id: string,
   fields: Partial<{
@@ -368,7 +386,13 @@ export async function createAccountFromDeal(dealId: string) {
   const { data: deal } = await supabase.from('deals').select('company, customer_name').eq('id', dealId).maybeSingle();
   const name = deal?.company?.trim() || deal?.customer_name?.trim() || 'New Account';
 
-  const { data: account } = await supabase.from('accounts').insert({ name }).select('id').single();
+  // Reuse an existing account with the same name (case-insensitive) rather than always
+  // inserting a new one — otherwise clicking this quick action from multiple deals that
+  // share a company (e.g. a distributor with several open opportunities) creates a
+  // separate duplicate account per deal instead of linking them to one shared account.
+  const { data: existing } = await supabase.from('accounts').select('id').ilike('name', name).maybeSingle();
+  const account = existing ?? (await supabase.from('accounts').insert({ name }).select('id').single()).data;
+
   if (account) {
     await supabase.from('deals').update({ account_id: account.id, updated_at: new Date().toISOString() }).eq('id', dealId);
   }

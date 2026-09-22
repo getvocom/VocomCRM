@@ -1,5 +1,7 @@
+import { AddLeadForm } from '@/components/add-lead-form';
 import { BarTrend } from '@/components/bar-trend';
 import { BreakdownBars } from '@/components/breakdown-bars';
+import { LeadsUploadForm } from '@/components/leads-upload-form';
 import { createClient } from '@/lib/supabase/server';
 import { LEAD_STATUSES, type Deal, type Lead, type Rep } from '@/lib/types';
 import { LeadsTable } from './table';
@@ -42,6 +44,9 @@ export default async function LeadsPage() {
         event leads. Referrals, Research, and LinkedIn Outreach each have their own page
         now (Sales → Referrals / Research, Marketing → LinkedIn Outreach).
       </p>
+
+      <AddLeadForm source="Other" />
+      <LeadsUploadForm source="Other" />
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <BarTrend title="New leads" data={dailyPoints} colorClass="bg-blue-500" />

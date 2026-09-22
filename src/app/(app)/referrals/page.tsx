@@ -1,5 +1,7 @@
+import { AddLeadForm } from '@/components/add-lead-form';
 import { BarTrend } from '@/components/bar-trend';
 import { BreakdownBars } from '@/components/breakdown-bars';
+import { LeadsUploadForm } from '@/components/leads-upload-form';
 import { createClient } from '@/lib/supabase/server';
 import { LEAD_STATUSES, type Deal, type Lead, type Rep } from '@/lib/types';
 import { LeadsTable } from '../leads/table';
@@ -41,6 +43,9 @@ export default async function ReferralsPage() {
         Leads that came in through a referral — kept separate from the main Leads list.
         Changing a lead&apos;s source away from Referral moves it off this page.
       </p>
+
+      <AddLeadForm source="Referral" />
+      <LeadsUploadForm source="Referral" />
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <BarTrend title="New leads" data={dailyPoints} colorClass="bg-blue-500" />
