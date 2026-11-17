@@ -1,4 +1,5 @@
 import '@/components/opp/opp.css';
+import { formatCompact } from '@/lib/format';
 import { createClient } from '@/lib/supabase/server';
 import { oppFontClasses } from '@/lib/opp-fonts';
 import { DEAL_PIPELINE_STATUSES, type Account, type Deal, type Rep } from '@/lib/types';
@@ -31,19 +32,29 @@ export default async function DealsPage() {
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
           <p className="text-sm text-neutral-500">Open deals</p>
-          <p className="mt-1 text-3xl font-semibold text-neutral-900">{openDeals.length}</p>
+          <p className="mt-1 text-2xl font-semibold text-neutral-900 sm:text-3xl">{openDeals.length}</p>
         </div>
         <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
           <p className="text-sm text-neutral-500">Open pipeline value</p>
-          <p className="mt-1 text-3xl font-semibold text-neutral-900">${pipelineValue.toLocaleString()}</p>
+          <p
+            className="mt-1 truncate text-2xl font-semibold text-neutral-900 sm:text-3xl"
+            title={`$${pipelineValue.toLocaleString()}`}
+          >
+            {formatCompact(pipelineValue)}
+          </p>
         </div>
         <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
           <p className="text-sm text-neutral-500">Won value</p>
-          <p className="mt-1 text-3xl font-semibold text-green-700">${wonValue.toLocaleString()}</p>
+          <p
+            className="mt-1 truncate text-2xl font-semibold text-green-700 sm:text-3xl"
+            title={`$${wonValue.toLocaleString()}`}
+          >
+            {formatCompact(wonValue)}
+          </p>
         </div>
         <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
           <p className="text-sm text-neutral-500">Total deals</p>
-          <p className="mt-1 text-3xl font-semibold text-neutral-900">{allDeals.length}</p>
+          <p className="mt-1 text-2xl font-semibold text-neutral-900 sm:text-3xl">{allDeals.length}</p>
         </div>
       </div>
       <div className="mb-6">

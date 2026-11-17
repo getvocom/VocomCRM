@@ -24,7 +24,7 @@ export function ValueBreakdown({ title, items }: { title: string; items: ValueBr
             const widthPct = Math.max((item.value / totalValue) * 100, item.value > 0 ? 3 : 0);
             return (
               <div key={item.label}>
-                <div className="mb-1 flex items-baseline justify-between text-sm">
+                <div className="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
                   <span className="font-medium text-neutral-700">{item.label}</span>
                   <span className="text-neutral-500">
                     {formatCompact(item.value)}
@@ -41,8 +41,8 @@ export function ValueBreakdown({ title, items }: { title: string; items: ValueBr
                     className={`flex h-5 items-center justify-end rounded-md ${bgClass} pr-2 transition-all`}
                     style={{ width: `${widthPct}%` }}
                   >
-                    {item.value > 0 && (
-                      <span className={`text-xs font-semibold ${textClass}`}>{formatCompact(item.value)}</span>
+                    {widthPct >= 22 && (
+                      <span className={`whitespace-nowrap text-xs font-semibold ${textClass}`}>{formatCompact(item.value)}</span>
                     )}
                   </div>
                 </div>

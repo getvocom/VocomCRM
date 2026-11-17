@@ -53,11 +53,11 @@ export default async function AccountsPage() {
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
           <p className="text-sm text-neutral-500">Total accounts</p>
-          <p className="mt-1 text-3xl font-semibold text-neutral-900">{allAccounts.length}</p>
+          <p className="mt-1 truncate text-2xl font-semibold text-neutral-900 sm:text-3xl">{allAccounts.length}</p>
         </div>
         <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
           <p className="text-sm text-neutral-500">Linked deals</p>
-          <p className="mt-1 text-3xl font-semibold text-neutral-900">
+          <p className="mt-1 truncate text-2xl font-semibold text-neutral-900 sm:text-3xl">
             {(deals ?? []).filter((d) => d.account_id).length}
           </p>
         </div>

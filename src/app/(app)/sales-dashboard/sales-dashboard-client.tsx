@@ -215,12 +215,14 @@ export function SalesDashboardClient({ deals, accounts }: { deals: Deal[]; accou
               <Link
                 key={deal.id}
                 href={`/deals?id=${deal.id}`}
-                className="flex items-center justify-between gap-3 py-2 text-sm hover:bg-neutral-50"
+                className="grid grid-cols-[minmax(0,1fr)_5.5rem_2.5rem_4.5rem] items-center gap-2 py-2 text-sm hover:bg-neutral-50 sm:grid-cols-[minmax(0,1fr)_7rem_3rem_5rem] sm:gap-3"
               >
-                <span className="font-medium text-neutral-900">{deal.customer_name}</span>
-                <span className="text-neutral-500">{deal.status}</span>
-                <span className={days > 70 ? 'font-semibold text-red-600' : 'font-medium text-amber-600'}>{days}d</span>
-                <span className="text-neutral-500">{formatCompact(deal.value)}</span>
+                <span className="truncate font-medium text-neutral-900">{deal.customer_name}</span>
+                <span className="truncate text-neutral-500">{deal.status}</span>
+                <span className={`text-right ${days > 70 ? 'font-semibold text-red-600' : 'font-medium text-amber-600'}`}>
+                  {days}d
+                </span>
+                <span className="text-right tabular-nums text-neutral-500">{formatCompact(deal.value)}</span>
               </Link>
             ))}
           </div>
@@ -233,11 +235,11 @@ export function SalesDashboardClient({ deals, accounts }: { deals: Deal[]; accou
         <div className="flex flex-col gap-4">
           <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
             <p className="text-sm text-neutral-500">Total Sales</p>
-            <p className="mt-1 text-3xl font-semibold text-neutral-900">{formatCompact(totalSales)}</p>
+            <p className="mt-1 truncate text-2xl font-semibold text-neutral-900 sm:text-3xl">{formatCompact(totalSales)}</p>
           </div>
           <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
             <p className="text-sm text-neutral-500">Total Potential Sales</p>
-            <p className="mt-1 text-3xl font-semibold text-neutral-900">{formatCompact(totalPotentialSales)}</p>
+            <p className="mt-1 truncate text-2xl font-semibold text-neutral-900 sm:text-3xl">{formatCompact(totalPotentialSales)}</p>
           </div>
         </div>
 

@@ -1,8 +1,9 @@
+import { formatCompact } from '@/lib/format';
 import { STATUS_COLORS } from '@/components/status-select';
 import { DEAL_PIPELINE_STATUSES, type Deal } from '@/lib/types';
 
 function currency(n: number) {
-  return `$${n.toLocaleString()}`;
+  return `$${Math.round(n).toLocaleString()}`;
 }
 
 export function StatusBreakdown({ deals }: { deals: Deal[] }) {
@@ -25,9 +26,9 @@ export function StatusBreakdown({ deals }: { deals: Deal[] }) {
           const widthPct = Math.max((value / totalValue) * 100, value > 0 ? 3 : 0);
           return (
             <div key={status}>
-              <div className="mb-1 flex items-baseline justify-between text-sm">
+              <div className="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
                 <span className="font-medium text-neutral-700">{status}</span>
-                <span className="text-neutral-500">
+                <span className="whitespace-nowrap text-neutral-500">
                   {currency(value)}{' '}
                   <span className="text-neutral-400">
                     · {count} deal{count === 1 ? '' : 's'}
@@ -39,7 +40,10 @@ export function StatusBreakdown({ deals }: { deals: Deal[] }) {
                   className={`flex h-5 items-center justify-end rounded-md ${bgClass} pr-2 transition-all`}
                   style={{ width: `${widthPct}%` }}
                 >
-                  {value > 0 && <span className={`text-xs font-semibold ${textClass}`}>{currency(value)}</span>}
+                  {/* Label the bar only when it is wide enough; the exact amount is in the row header. */}
+                  {widthPct >= 22 && (
+                    <span className={`whitespace-nowrap text-xs font-semibold ${textClass}`}>{formatCompact(value)}</span>
+                  )}
                 </div>
               </div>
             </div>

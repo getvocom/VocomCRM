@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { BarTrend } from '@/components/bar-trend';
 import { BreakdownBars } from '@/components/breakdown-bars';
+import { formatCompact } from '@/lib/format';
 import { createClient } from '@/lib/supabase/server';
 import { ACTIVITY_TYPES } from '@/lib/types';
 import { InterestBreakdown } from './interest-breakdown';
@@ -73,7 +74,7 @@ export default async function DashboardPage() {
     { label: 'Needs Cold Call', count: coldCallCount ?? 0, href: '/instantly-leads?filter=All&coldCall=1' },
     { label: 'LinkedIn Activity Logged', count: linkedinCount ?? 0, href: '/linkedin-activity' },
     { label: 'Open Deals', count: openDealsCount ?? 0, href: '/deals' },
-    { label: 'Open Pipeline Value', count: `$${openDealsValue.toLocaleString()}`, href: '/deals' },
+    { label: 'Open Pipeline Value', count: formatCompact(openDealsValue), href: '/deals' },
     { label: 'Open Feedback', count: openFeedbackCount ?? 0, href: '/feedback' }
   ];
 
@@ -101,7 +102,9 @@ export default async function DashboardPage() {
             className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:border-neutral-300"
           >
             <p className="text-sm text-neutral-500">{tile.label}</p>
-            <p className="mt-1 text-3xl font-semibold text-neutral-900">{tile.count}</p>
+            <p className="mt-1 truncate text-2xl font-semibold text-neutral-900 sm:text-3xl" title={String(tile.count)}>
+              {tile.count}
+            </p>
           </Link>
         ))}
       </div>
