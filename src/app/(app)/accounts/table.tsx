@@ -6,7 +6,8 @@ import { deleteAccount, updateAccount } from '@/app/actions';
 import { DeleteButton } from '@/components/delete-button';
 import { RepSelect } from '@/components/rep-select';
 import { StatusSelect } from '@/components/status-select';
-import { REGIONS, type Account, type Rep } from '@/lib/types';
+import { formatUsd } from '@/lib/opportunities';
+import { ACCOUNT_KINDS, ACCOUNT_STATUSES, REGIONS, type Account, type Rep } from '@/lib/types';
 import { useHighlightRow } from '@/lib/use-highlight-row';
 
 function Cell({ value, onChange, width = 'w-32' }: { value: string | null; onChange: (value: string) => Promise<void>; width?: string }) {
@@ -30,12 +31,14 @@ export function AccountsTable({
   accounts,
   reps,
   contactCounts,
-  dealCounts
+  dealCounts,
+  dealSummary
 }: {
   accounts: Account[];
   reps: Rep[];
   contactCounts: Record<string, number>;
   dealCounts: Record<string, number>;
+  dealSummary: Record<string, { open: number; openValue: number; stages: Record<string, number> }>;
 }) {
   const { rowProps } = useHighlightRow();
   const [search, setSearch] = useState('');
@@ -46,7 +49,7 @@ export function AccountsTable({
     let rows = accounts;
     if (q) {
       rows = rows.filter((a) =>
-        [a.name, a.hq, a.website, a.industry, a.region].filter(Boolean).some((field) => field!.toLowerCase().includes(q))
+        [a.name, a.hq, a.website, a.industry, a.region, a.kind, a.location, a.economic_buyer, a.champions].filter(Boolean).some((field) => field!.toLowerCase().includes(q))
       );
     }
     const sorted = [...rows];
@@ -110,6 +113,10 @@ export function AccountsTable({
                 <th className="px-4 py-3 font-medium">Size</th>
                 <th className="px-4 py-3 font-medium">Region</th>
                 <th className="px-4 py-3 font-medium">Assigned Rep</th>
+                <th className="px-4 py-3 font-medium">Type</th>
+                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Open value</th>
+                <th className="px-4 py-3 font-medium">Stages</th>
                 <th className="px-4 py-3 font-medium">POCs</th>
                 <th className="px-4 py-3 font-medium">Deals</th>
                 <th className="px-4 py-3 font-medium"></th>
@@ -152,6 +159,30 @@ export function AccountsTable({
                       value={account.assigned_rep_id}
                       onChange={(repId) => updateAccount(account.id, { assigned_rep_id: repId })}
                     />
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusSelect
+                      options={['Unset', ...ACCOUNT_KINDS]}
+                      value={account.kind ?? 'Unset'}
+                      onChange={(kind) => updateAccount(account.id, { kind: kind === 'Unset' ? null : (kind as Account['kind']) })}
+                    />
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusSelect
+                      options={['Unset', ...ACCOUNT_STATUSES]}
+                      value={account.account_status ?? 'Unset'}
+                      onChange={(s) =>
+                        updateAccount(account.id, { account_status: s === 'Unset' ? null : (s as Account['account_status']) })
+                      }
+                    />
+                  </td>
+                  <td className="px-4 py-3 font-mono text-neutral-700">
+                    {dealSummary[account.id]?.openValue ? formatUsd(dealSummary[account.id].openValue) : '—'}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-neutral-600">
+                    {Object.entries(dealSummary[account.id]?.stages ?? {})
+                      .map(([stage, n]) => `${stage} ${n}`)
+                      .join(', ') || '—'}
                   </td>
                   <td className="px-4 py-3 text-neutral-600">{contactCounts[account.id] ?? 0}</td>
                   <td className="px-4 py-3 text-neutral-600">{dealCounts[account.id] ?? 0}</td>

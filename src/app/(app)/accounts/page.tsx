@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { isOpen } from '@/lib/opportunities';
 import type { Account, AccountContact, Deal, Rep } from '@/lib/types';
 import { AddAccountForm } from './add-account-form';
 import { AccountsTable } from './table';
@@ -10,7 +11,10 @@ export default async function AccountsPage() {
     supabase.from('accounts').select('*').order('name').returns<Account[]>(),
     supabase.from('reps').select('*').order('name').returns<Rep[]>(),
     supabase.from('account_contacts').select('id, account_id').returns<Pick<AccountContact, 'id' | 'account_id'>[]>(),
-    supabase.from('deals').select('id, account_id').returns<Pick<Deal, 'id' | 'account_id'>[]>()
+    supabase
+      .from('deals')
+      .select('id, account_id, value, stage, status')
+      .returns<Pick<Deal, 'id' | 'account_id' | 'value' | 'stage' | 'status'>[]>()
   ]);
 
   const allAccounts = accounts ?? [];
@@ -23,6 +27,19 @@ export default async function AccountsPage() {
   const dealCounts: Record<string, number> = {};
   (deals ?? []).forEach((d) => {
     if (d.account_id) dealCounts[d.account_id] = (dealCounts[d.account_id] ?? 0) + 1;
+  });
+
+  // Per-account open opportunity count/value and a stage tally, shown in the table.
+  const dealSummary: Record<string, { open: number; openValue: number; stages: Record<string, number> }> = {};
+  (deals ?? []).forEach((d) => {
+    if (!d.account_id) return;
+    const row = (dealSummary[d.account_id] ??= { open: 0, openValue: 0, stages: {} });
+    const stage = d.stage ?? d.status;
+    row.stages[stage] = (row.stages[stage] ?? 0) + 1;
+    if (isOpen(d as Deal)) {
+      row.open += 1;
+      row.openValue += d.value;
+    }
   });
 
   return (
@@ -48,7 +65,13 @@ export default async function AccountsPage() {
 
       <AddAccountForm reps={reps ?? []} />
 
-      <AccountsTable accounts={allAccounts} reps={reps ?? []} contactCounts={contactCounts} dealCounts={dealCounts} />
+      <AccountsTable
+        accounts={allAccounts}
+        reps={reps ?? []}
+        contactCounts={contactCounts}
+        dealCounts={dealCounts}
+        dealSummary={dealSummary}
+      />
     </div>
   );
 }

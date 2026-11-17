@@ -77,6 +77,13 @@ export interface Account {
   assigned_rep_id: string | null;
   created_at: string;
   updated_at: string;
+  kind: AccountKind | null;
+  account_status: AccountStatus | null;
+  location: string | null;
+  supporters: string[];
+  economic_buyer: string | null;
+  champions: string | null;
+  info: KeyValue[];
 }
 
 export interface AccountContact {
@@ -88,6 +95,7 @@ export interface AccountContact {
   phone: string | null;
   notes: string | null;
   created_at: string;
+  role: string | null;
 }
 
 export interface InstantlyLead {
@@ -209,6 +217,25 @@ export interface Deal {
   division: string | null;
   source: LeadSource | null;
   stage_changed_at: string;
+  // Opportunity-tracker fields (migration_021). `value` is the quoted price to the
+  // customer (0 = not priced yet) and `cost` is what Vocom pays.
+  title: string | null;
+  stage: DealStage | null;
+  priority: DealPriority | null;
+  deal_type: DealType | null;
+  track: DealTrack | null;
+  cost: number | null;
+  quote_basis: string | null;
+  cost_basis: string | null;
+  summary: string | null;
+  next_action: string | null;
+  next_action_date: string | null;
+  vendor_quotes: VendorQuote[];
+  questions: DealQuestion[];
+  specs: KeyValue[];
+  deal_contacts: DealContactRef[];
+  activity: ActivityEntry[];
+  files: DealFile[];
 }
 
 export interface Feedback {
@@ -238,4 +265,146 @@ export interface SeoMonthlyReport {
   content_suggestions: ContentSuggestion[];
   stats: { opportunityCount?: number; queriesAnalyzed?: number };
   generated_at: string;
+}
+
+
+// ---------------------------------------------------------------------------
+// Opportunity tracker (migration_021)
+// ---------------------------------------------------------------------------
+
+export type DealStage = 'Lead' | 'Quoting' | 'Quoted' | 'Negotiating' | 'Won' | 'On hold' | 'Lost';
+export const DEAL_STAGES: DealStage[] = ['Lead', 'Quoting', 'Quoted', 'Negotiating', 'Won', 'On hold', 'Lost'];
+export const OPEN_STAGES: DealStage[] = ['Lead', 'Quoting', 'Quoted', 'Negotiating'];
+
+// deals.status is still what the Sales Dashboard and Deals totals read, so it is derived
+// from the detailed stage. `null` means "leave status as it is" (a deal put on hold keeps
+// the pipeline status it had).
+export const STAGE_TO_STATUS: Record<DealStage, DealPipelineStatus | null> = {
+  Lead: 'Prospecting',
+  Quoting: 'Proposal',
+  Quoted: 'Proposal',
+  Negotiating: 'Negotiation',
+  Won: 'Won',
+  'On hold': null,
+  Lost: 'Lost'
+};
+
+export type DealPriority = 'High' | 'Med' | 'Low';
+export const DEAL_PRIORITIES: DealPriority[] = ['High', 'Med', 'Low'];
+
+export type DealType = 'Fiber' | 'Data Center' | 'AI Servers' | 'Components' | 'RenOS';
+export const DEAL_TYPES: DealType[] = ['Fiber', 'Data Center', 'AI Servers', 'Components', 'RenOS'];
+
+export type DealTrack = 'Fiber' | 'RenOS' | 'Vocom';
+export const DEAL_TRACKS: DealTrack[] = ['Fiber', 'RenOS', 'Vocom'];
+
+// Owner commission on a won deal, as a share of profit (quoted price minus cost).
+export const OWNER_COMMISSION_RATE = 0.15;
+
+export type QuoteStatus = 'Not requested' | 'Requested' | 'Waiting' | 'Received' | 'Revised' | 'Declined' | 'Unconfirmed';
+export const QUOTE_STATUSES: QuoteStatus[] = [
+  'Not requested',
+  'Requested',
+  'Waiting',
+  'Received',
+  'Revised',
+  'Declined',
+  'Unconfirmed'
+];
+// Statuses where we are still waiting on the vendor.
+export const WAITING_QUOTE_STATUSES: QuoteStatus[] = ['Requested', 'Waiting'];
+
+export interface KeyValue {
+  k: string;
+  v: string;
+}
+
+export interface VendorQuote {
+  vendor: string;
+  status: QuoteStatus;
+  quote: string;
+  notes: string;
+}
+
+export interface DealQuestion {
+  id: string;
+  q: string;
+  owner: string;
+  done: boolean;
+  answer?: string;
+}
+
+export interface DealContactRef {
+  name: string;
+  role: string;
+}
+
+export interface ActivityEntry {
+  d: string; // ISO date (yyyy-mm-dd)
+  t: string;
+}
+
+export interface DealFile {
+  name: string;
+  kind: string;
+  size: string;
+}
+
+export type AccountKind =
+  | 'Distributor'
+  | 'End customer'
+  | 'Data center operator'
+  | 'Builder / contractor'
+  | 'Carrier / ISP'
+  | 'OEM / assembler'
+  | 'Partner / referrer'
+  | 'Other';
+export const ACCOUNT_KINDS: AccountKind[] = [
+  'Distributor',
+  'End customer',
+  'Data center operator',
+  'Builder / contractor',
+  'Carrier / ISP',
+  'OEM / assembler',
+  'Partner / referrer',
+  'Other'
+];
+
+export type AccountStatus = 'Active' | 'Prospect' | 'Dormant' | 'Past';
+export const ACCOUNT_STATUSES: AccountStatus[] = ['Active', 'Prospect', 'Dormant', 'Past'];
+
+export type VendorKind =
+  | 'Manufacturer'
+  | 'Trading company'
+  | 'Optics maker'
+  | 'Assembler / OEM'
+  | 'Distributor'
+  | 'DC owner / operator'
+  | 'Other';
+export const VENDOR_KINDS: VendorKind[] = [
+  'Manufacturer',
+  'Trading company',
+  'Optics maker',
+  'Assembler / OEM',
+  'Distributor',
+  'DC owner / operator',
+  'Other'
+];
+
+export type VendorRelationship = 'Active' | 'Prospect' | 'Past' | 'Inactive';
+export const VENDOR_RELATIONSHIPS: VendorRelationship[] = ['Active', 'Prospect', 'Past', 'Inactive'];
+
+export interface Vendor {
+  id: string;
+  name: string;
+  kind: VendorKind | null;
+  relationship: VendorRelationship | null;
+  location: string | null;
+  products: string | null;
+  terms: string | null;
+  notes: string | null;
+  aliases: string[];
+  contacts: DealContactRef[];
+  created_at: string;
+  updated_at: string;
 }

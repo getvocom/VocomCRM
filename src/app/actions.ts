@@ -3,6 +3,25 @@
 import { revalidatePath } from 'next/cache';
 import { runInstantlySync } from '@/lib/instantly-sync';
 import { createClient } from '@/lib/supabase/server';
+import { newId, stageOf, todayIso } from '@/lib/opportunities';
+import {
+  STAGE_TO_STATUS,
+  type AccountKind,
+  type AccountStatus,
+  type ActivityEntry,
+  type Deal,
+  type DealContactRef,
+  type DealFile,
+  type DealPriority,
+  type DealQuestion,
+  type DealStage,
+  type DealTrack,
+  type DealType,
+  type KeyValue,
+  type VendorQuote,
+  type VendorKind,
+  type VendorRelationship
+} from '@/lib/types';
 import type {
   DealPipelineStatus,
   DealStatus,
@@ -324,6 +343,13 @@ export async function updateAccount(
     region: string | null;
     notes: string | null;
     assigned_rep_id: string | null;
+    kind: AccountKind | null;
+    account_status: AccountStatus | null;
+    location: string | null;
+    supporters: string[];
+    economic_buyer: string | null;
+    champions: string | null;
+    info: KeyValue[];
   }>
 ) {
   const supabase = await createClient();
@@ -455,4 +481,190 @@ export async function deleteNotification(id: string) {
 export async function clearAllNotifications() {
   const supabase = await createClient();
   await supabase.from('notifications').delete().not('id', 'is', null);
+}
+
+
+// ---------------------------------------------------------------------------
+// Opportunity tracker (migration_021)
+// ---------------------------------------------------------------------------
+
+export type OpportunityFields = Partial<{
+  title: string | null;
+  account_id: string | null;
+  assigned_rep_id: string | null;
+  stage: DealStage;
+  priority: DealPriority | null;
+  deal_type: DealType | null;
+  track: DealTrack | null;
+  value: number;
+  cost: number | null;
+  quote_basis: string | null;
+  cost_basis: string | null;
+  summary: string | null;
+  next_action: string | null;
+  next_action_date: string | null;
+  customer_name: string;
+  vendor_quotes: VendorQuote[];
+  questions: DealQuestion[];
+  specs: KeyValue[];
+  deal_contacts: DealContactRef[];
+  activity: ActivityEntry[];
+  files: DealFile[];
+}>;
+
+function revalidateOpportunities() {
+  revalidatePath('/deals');
+  revalidatePath('/accounts');
+  revalidatePath('/sales-dashboard');
+}
+
+export async function updateOpportunity(id: string, fields: OpportunityFields) {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+  const update: Record<string, unknown> = { ...fields, updated_at: now };
+
+  if (fields.stage) {
+    const { data: current } = await supabase.from('deals').select('*').eq('id', id).maybeSingle<Deal>();
+    const before = current ? stageOf(current) : null;
+    if (before !== fields.stage) {
+      const status = STAGE_TO_STATUS[fields.stage];
+      if (status) update.status = status;
+      update.stage_changed_at = now;
+      // Append to the log unless the caller is already sending a full activity list.
+      if (!fields.activity) {
+        update.activity = [
+          { d: todayIso(), t: `Stage changed from ${before ?? 'none'} to ${fields.stage}.` },
+          ...(current?.activity ?? [])
+        ];
+      }
+    }
+  }
+
+  const { data: updated } = await supabase.from('deals').update(update).eq('id', id).select('customer_name, title').maybeSingle();
+  if (fields.assigned_rep_id) {
+    await notifyAssignment(
+      supabase,
+      fields.assigned_rep_id,
+      'deal',
+      updated?.title || updated?.customer_name || 'a deal',
+      '/deals',
+      id
+    );
+  }
+  revalidateOpportunities();
+}
+
+export async function addOpportunity(input: {
+  title: string;
+  account_id: string | null;
+  stage: DealStage;
+  deal_type: DealType | null;
+  track: DealTrack | null;
+  priority: DealPriority | null;
+  assigned_rep_id: string | null;
+}): Promise<string | null> {
+  const title = input.title.trim();
+  if (!title) return null;
+  const supabase = await createClient();
+
+  let accountName: string | null = null;
+  if (input.account_id) {
+    const { data } = await supabase.from('accounts').select('name').eq('id', input.account_id).maybeSingle();
+    accountName = data?.name ?? null;
+  }
+  const { data, error } = await supabase
+    .from('deals')
+    .insert({
+      title,
+      customer_name: accountName ?? title,
+      company: accountName,
+      account_id: input.account_id,
+      assigned_rep_id: input.assigned_rep_id,
+      stage: input.stage,
+      status: STAGE_TO_STATUS[input.stage] ?? 'Prospecting',
+      deal_type: input.deal_type,
+      track: input.track,
+      priority: input.priority,
+      activity: [{ d: todayIso(), t: 'Opportunity created' }]
+    })
+    .select('id')
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  revalidateOpportunities();
+  return data?.id ?? null;
+}
+
+export async function addOpportunityQuestion(id: string, q: string, owner: string) {
+  const text = q.trim();
+  if (!text) return;
+  const supabase = await createClient();
+  const { data } = await supabase.from('deals').select('questions').eq('id', id).maybeSingle();
+  const questions: DealQuestion[] = [...(data?.questions ?? []), { id: newId(), q: text, owner: owner.trim(), done: false }];
+  await supabase.from('deals').update({ questions, updated_at: new Date().toISOString() }).eq('id', id);
+  revalidateOpportunities();
+}
+
+export async function setQuestionDone(id: string, questionId: string, done: boolean) {
+  const supabase = await createClient();
+  const { data } = await supabase.from('deals').select('questions').eq('id', id).maybeSingle();
+  const questions: DealQuestion[] = (data?.questions ?? []).map((x: DealQuestion) =>
+    x.id === questionId ? { ...x, done } : x
+  );
+  await supabase.from('deals').update({ questions, updated_at: new Date().toISOString() }).eq('id', id);
+  revalidateOpportunities();
+}
+
+export async function logOpportunityActivity(id: string, text: string) {
+  const t = text.trim();
+  if (!t) return;
+  const supabase = await createClient();
+  const { data } = await supabase.from('deals').select('activity').eq('id', id).maybeSingle();
+  const activity: ActivityEntry[] = [{ d: todayIso(), t }, ...(data?.activity ?? [])];
+  await supabase.from('deals').update({ activity, updated_at: new Date().toISOString() }).eq('id', id);
+  revalidateOpportunities();
+}
+
+export async function deleteOpportunity(id: string) {
+  const supabase = await createClient();
+  await supabase.from('deals').delete().eq('id', id);
+  revalidateOpportunities();
+}
+
+export async function addVendor(input: { name: string; kind: VendorKind | null; relationship: VendorRelationship | null }) {
+  const name = input.name.trim();
+  if (!name) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('vendors')
+    .insert({ name, kind: input.kind, relationship: input.relationship })
+    .select('id')
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  revalidatePath('/vendors');
+  return data?.id ?? null;
+}
+
+export async function updateVendor(
+  id: string,
+  fields: Partial<{
+    name: string;
+    kind: VendorKind | null;
+    relationship: VendorRelationship | null;
+    location: string | null;
+    products: string | null;
+    terms: string | null;
+    notes: string | null;
+    aliases: string[];
+    contacts: DealContactRef[];
+  }>
+) {
+  const supabase = await createClient();
+  await supabase.from('vendors').update({ ...fields, updated_at: new Date().toISOString() }).eq('id', id);
+  revalidatePath('/vendors');
+}
+
+export async function deleteVendor(id: string) {
+  const supabase = await createClient();
+  await supabase.from('vendors').delete().eq('id', id);
+  revalidatePath('/vendors');
 }

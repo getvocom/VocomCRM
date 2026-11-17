@@ -18,6 +18,7 @@ const NAV_GROUPS = [
       { href: '/referrals', label: 'Referrals' },
       { href: '/research', label: 'Research' },
       { href: '/deals', label: 'Deals' },
+      { href: '/vendors', label: 'Vendors' },
       { href: '/sales-dashboard', label: 'Sales Dashboard' }
     ]
   },
