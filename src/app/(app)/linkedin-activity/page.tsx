@@ -1,17 +1,10 @@
 import { addLinkedInActivity } from '@/app/actions';
+import { PageHeader } from '@/components/ui';
+import { chartClass } from '@/lib/pill-colors';
 import { BreakdownBars } from '@/components/breakdown-bars';
 import { createClient } from '@/lib/supabase/server';
 import { ACTIVITY_TYPES, DEAL_STATUSES, type LinkedInActivity, type Rep } from '@/lib/types';
 import { LinkedInActivityTable } from './table';
-
-const DEAL_COLORS: Record<string, string> = {
-  Prospecting: 'bg-neutral-500',
-  Connected: 'bg-blue-500',
-  Conversation: 'bg-amber-500',
-  Meeting: 'bg-purple-500',
-  Won: 'bg-green-500',
-  Lost: 'bg-red-400'
-};
 
 export default async function LinkedInActivityPage() {
   const supabase = await createClient();
@@ -33,18 +26,24 @@ export default async function LinkedInActivityPage() {
   const dealBreakdown = DEAL_STATUSES.map((status) => ({
     label: status,
     count: allActivity.filter((a) => a.deal_status === status).length,
-    colorClass: DEAL_COLORS[status]
+    colorClass: chartClass(status)
   }));
   const sentCount = allActivity.filter((a) => a.connection_sent).length;
   const acceptedCount = allActivity.filter((a) => a.connection_accepted).length;
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold text-neutral-900">LinkedIn Activity</h1>
-      <p className="mb-6 text-sm text-neutral-500">
-        LinkedIn doesn&apos;t expose followers/visits/likes via API, so this is logged manually —
-        check LinkedIn&apos;s own notifications, then add what&apos;s new here.
-      </p>
+      <PageHeader
+        group="Marketing"
+        title="LinkedIn Activity"
+        className="mb-6"
+        description={
+          <>
+            LinkedIn doesn&apos;t expose followers/visits/likes via API, so this is logged manually —
+            check LinkedIn&apos;s own notifications, then add what&apos;s new here.
+          </>
+        }
+      />
 
       {allActivity.length > 0 && (
         <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -53,9 +52,9 @@ export default async function LinkedInActivityPage() {
           <BreakdownBars
             title="Connection funnel"
             items={[
-              { label: 'Logged', count: allActivity.length, colorClass: 'bg-neutral-500' },
-              { label: 'Sent', count: sentCount, colorClass: 'bg-blue-500' },
-              { label: 'Accepted', count: acceptedCount, colorClass: 'bg-green-500' }
+              { label: 'Logged', count: allActivity.length, colorClass: 'bg-chart-grey' },
+              { label: 'Sent', count: sentCount, colorClass: 'bg-chart-blue' },
+              { label: 'Accepted', count: acceptedCount, colorClass: 'bg-chart-green' }
             ]}
           />
         </div>
@@ -63,35 +62,35 @@ export default async function LinkedInActivityPage() {
 
       <form
         action={addLinkedInActivity}
-        className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm"
+        className="mb-6 flex flex-wrap items-end gap-3 card p-5"
       >
         <div className="w-full sm:w-auto">
-          <label className="mb-1 block text-xs font-medium text-neutral-500">Prospect</label>
+          <label className="mb-1 block text-xs font-medium text-ink-2">Prospect</label>
           <input
             name="prospect"
             required
-            className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900 sm:w-auto"
+            className="w-full field sm:w-auto"
           />
         </div>
         <div className="w-full sm:w-auto">
-          <label className="mb-1 block text-xs font-medium text-neutral-500">Company</label>
+          <label className="mb-1 block text-xs font-medium text-ink-2">Company</label>
           <input
             name="company"
-            className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900 sm:w-auto"
+            className="w-full field sm:w-auto"
           />
         </div>
         <div className="w-full sm:w-auto">
-          <label className="mb-1 block text-xs font-medium text-neutral-500">LinkedIn URL</label>
+          <label className="mb-1 block text-xs font-medium text-ink-2">LinkedIn URL</label>
           <input
             name="linkedin_url"
-            className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900 sm:w-56"
+            className="w-full field sm:w-56"
           />
         </div>
         <div className="w-full sm:w-auto">
-          <label className="mb-1 block text-xs font-medium text-neutral-500">Activity</label>
+          <label className="mb-1 block text-xs font-medium text-ink-2">Activity</label>
           <select
             name="activity"
-            className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900 sm:w-auto"
+            className="w-full field sm:w-auto"
           >
             {ACTIVITY_TYPES.map((type) => (
               <option key={type} value={type}>
@@ -102,7 +101,7 @@ export default async function LinkedInActivityPage() {
         </div>
         <button
           type="submit"
-          className="w-full rounded-md bg-neutral-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-neutral-700 sm:w-auto"
+          className="w-full btn btn-primary sm:w-auto"
         >
           Log activity
         </button>

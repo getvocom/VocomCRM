@@ -14,7 +14,7 @@ function notificationHref(n: Notification) {
   return `${n.link}${separator}id=${n.related_id}`;
 }
 
-export function NotificationBell() {
+export function NotificationBell({ align = 'right' }: { align?: 'left' | 'right' }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -69,7 +69,7 @@ export function NotificationBell() {
       <button
         onClick={toggleOpen}
         aria-label="Notifications"
-        className="relative flex h-9 w-9 items-center justify-center rounded-full text-neutral-500 hover:bg-neutral-100"
+        className="relative flex h-8 w-8 items-center justify-center rounded-lg text-ink-2 hover:bg-divider hover:text-ink"
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}>
           <path
@@ -79,14 +79,14 @@ export function NotificationBell() {
           />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-vocom px-1 text-[10px] font-semibold text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold text-white">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 max-h-96 w-80 overflow-y-auto rounded-xl border border-neutral-200 bg-white shadow-lg">
+        <div className={`absolute ${align === 'left' ? 'left-0' : 'right-0'} z-50 mt-2 max-h-96 w-80 overflow-y-auto rounded-xl border border-line bg-panel shadow-lg`}>
           <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-2">
             <span className="text-xs font-medium text-neutral-500">Notifications</span>
             {notifications.length > 0 && (

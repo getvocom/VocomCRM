@@ -4,53 +4,49 @@ export interface ValueBreakdownItem {
   label: string;
   value: number;
   count?: number;
-  colorClass?: string; // two space-separated classes, e.g. "bg-blue-100 text-blue-700"
+  colorClass?: string; // a solid bar fill, e.g. chartClass('Won') from lib/pill-colors
 }
 
-const DEFAULT_COLOR = 'bg-neutral-100 text-neutral-700';
+const DEFAULT_COLOR = 'bg-chart-grey';
 
 export function ValueBreakdown({ title, items }: { title: string; items: ValueBreakdownItem[] }) {
   const totalValue = items.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-      <h3 className="mb-3 text-sm font-medium text-neutral-700">{title}</h3>
+    <section className="card p-5">
+      <h2 className="mb-[18px] text-[15px] font-semibold leading-snug text-ink">{title}</h2>
       {items.length === 0 || totalValue === 0 ? (
-        <p className="text-sm text-neutral-500">No data to show.</p>
+        <p className="text-sm text-ink-2">No data to show.</p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3.5">
           {items.map((item) => {
-            const [bgClass, textClass] = (item.colorClass ?? DEFAULT_COLOR).split(' ');
             const widthPct = Math.max((item.value / totalValue) * 100, item.value > 0 ? 3 : 0);
             return (
               <div key={item.label}>
-                <div className="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
-                  <span className="font-medium text-neutral-700">{item.label}</span>
-                  <span className="text-neutral-500">
+                <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-x-3 text-[13px]">
+                  <span className="text-ink">{item.label}</span>
+                  <span className="tabular-nums text-ink-2">
                     {formatCompact(item.value)}
                     {item.count !== undefined && (
-                      <span className="text-neutral-400">
+                      <>
                         {' '}
                         · {item.count} deal{item.count === 1 ? '' : 's'}
-                      </span>
+                      </>
                     )}
                   </span>
                 </div>
-                <div className="h-5 w-full overflow-hidden rounded-md bg-neutral-100">
+                {/* The amount is in the row header above, so the bar carries no label. */}
+                <div className="h-2 w-full overflow-hidden rounded-full bg-divider">
                   <div
-                    className={`flex h-5 items-center justify-end rounded-md ${bgClass} pr-2 transition-all`}
+                    className={`h-2 rounded-full ${item.colorClass ?? DEFAULT_COLOR} transition-all`}
                     style={{ width: `${widthPct}%` }}
-                  >
-                    {widthPct >= 22 && (
-                      <span className={`whitespace-nowrap text-xs font-semibold ${textClass}`}>{formatCompact(item.value)}</span>
-                    )}
-                  </div>
+                  />
                 </div>
               </div>
             );
           })}
         </div>
       )}
-    </div>
+    </section>
   );
 }

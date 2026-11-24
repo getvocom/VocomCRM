@@ -1,43 +1,70 @@
 import { addLead } from '@/app/actions';
+import type { LeadSource } from '@/lib/types';
 
-export function AddLeadForm({ source }: { source: string }) {
+export function AddLeadForm({
+  source,
+  // Pages that list a single source (Referrals, Research, LinkedIn Outreach) keep the
+  // source fixed; the Leads page passes the full list so a lead can be filed straight
+  // into Cold Email, Website, Offline Event, etc.
+  selectableSources
+}: {
+  source: string;
+  selectableSources?: LeadSource[];
+}) {
   return (
     <form
       action={addLead}
-      className="mb-6 grid grid-cols-1 gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4"
+      className="card mb-6 grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4"
     >
-      <input type="hidden" name="source" value={source} />
-      <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-500">Name</label>
-        <input name="name" className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900" />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-500">Company</label>
-        <input name="company" className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900" />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-500">Job title</label>
+      {selectableSources ? (
+        <label className="block">
+        <span className="mb-1 block text-xs font-medium text-ink-2">Source</span>
+          <select
+            name="source"
+            defaultValue={source}
+            className="field w-full"
+          >
+            {selectableSources.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : (
+        <input type="hidden" name="source" value={source} />
+      )}
+      <label className="block">
+        <span className="mb-1 block text-xs font-medium text-ink-2">Name</span>
+        <input name="name" className="field w-full" />
+      </label>
+      <label className="block">
+        <span className="mb-1 block text-xs font-medium text-ink-2">Company</span>
+        <input name="company" className="field w-full" />
+      </label>
+      <label className="block">
+        <span className="mb-1 block text-xs font-medium text-ink-2">Job title</span>
         <input
           name="job_title"
-          className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900"
+          className="field w-full"
         />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-500">Email</label>
+      </label>
+      <label className="block">
+        <span className="mb-1 block text-xs font-medium text-ink-2">Email</span>
         <input
           name="email"
           type="email"
-          className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900"
+          className="field w-full"
         />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-500">Phone</label>
-        <input name="phone" className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900" />
-      </div>
+      </label>
+      <label className="block">
+        <span className="mb-1 block text-xs font-medium text-ink-2">Phone</span>
+        <input name="phone" className="field w-full" />
+      </label>
       <div className="flex items-end">
         <button
           type="submit"
-          className="w-full rounded-md bg-neutral-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-neutral-700"
+          className="btn btn-primary w-full"
         >
           Add lead
         </button>

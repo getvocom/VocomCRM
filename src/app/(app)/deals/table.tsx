@@ -46,7 +46,7 @@ function TextCell({
         }
         if (next !== (value ?? '')) startTransition(() => onChange(next));
       }}
-      className={`${width} rounded-md border border-neutral-300 px-2 py-1 text-sm text-neutral-900 disabled:opacity-50`}
+      className={`${width} rounded-md border border-line px-2 py-1 text-sm text-ink disabled:opacity-50`}
     />
   );
 }
@@ -59,7 +59,7 @@ function DateInput({ value, onChange }: { value: string | null; onChange: (value
       defaultValue={value ?? ''}
       disabled={isPending}
       onChange={(e) => e.target.value && startTransition(() => onChange(e.target.value))}
-      className="rounded-md border border-neutral-300 px-2 py-1 text-sm text-neutral-900 disabled:opacity-50"
+      className="rounded-md border border-line px-2 py-1 text-sm text-ink disabled:opacity-50"
     />
   );
 }
@@ -75,7 +75,7 @@ function ValueInput({ value, onChange }: { value: number; onChange: (value: numb
         const n = Number(e.target.value);
         if (!Number.isNaN(n) && n !== value) startTransition(() => onChange(n));
       }}
-      className="w-28 rounded-md border border-neutral-300 px-2 py-1 text-sm text-neutral-900 disabled:opacity-50"
+      className="w-28 rounded-md border border-line px-2 py-1 text-sm text-ink disabled:opacity-50"
     />
   );
 }
@@ -93,7 +93,7 @@ function AccountCell({ deal, accounts }: { deal: Deal; accounts: Account[] }) {
       {linkedAccount && (
         <Link
           href={`/accounts/${linkedAccount.id}`}
-          className="text-xs text-neutral-400 hover:text-neutral-600"
+          className="text-xs text-ink-2 hover:text-ink-3"
           title={`Open ${linkedAccount.name}`}
         >
           view →
@@ -103,7 +103,7 @@ function AccountCell({ deal, accounts }: { deal: Deal; accounts: Account[] }) {
         <button
           disabled={isPending}
           onClick={() => startTransition(() => createAccountFromDeal(deal.id))}
-          className="text-xs text-neutral-400 hover:text-neutral-600 disabled:opacity-50"
+          className="text-xs text-ink-2 hover:text-ink-3 disabled:opacity-50"
           title={`Create an account named "${deal.company}" and link this deal to it`}
         >
           + Account
@@ -125,12 +125,12 @@ function StageDurationCell({ deal }: { deal: Deal }) {
   const days = daysInStage(deal.stage_changed_at);
   const isOpen = STALE_OPEN_STATUSES.includes(deal.status);
   const colorClass = !isOpen
-    ? 'text-neutral-400'
+    ? 'text-ink-2'
     : days > 70
       ? 'font-semibold text-red-600'
       : days > 42
         ? 'font-medium text-amber-600'
-        : 'text-neutral-600';
+        : 'text-ink-3';
   return (
     <span className={colorClass} title={isOpen && days > 42 ? `${days} days without a stage change` : undefined}>
       {days}d
@@ -157,7 +157,7 @@ function SelectAllCheckbox({
       type="checkbox"
       checked={checked}
       onChange={(e) => onChange(e.target.checked)}
-      className="h-4 w-4 rounded border-neutral-300"
+      className="h-4 w-4 rounded border-line"
       aria-label="Select all visible deals"
     />
   );
@@ -195,10 +195,10 @@ function SortHeader({
       <button
         type="button"
         onClick={() => onSort(sortKey)}
-        className="flex items-center gap-1 text-neutral-500 hover:text-neutral-800"
+        className="flex items-center gap-1 text-ink-2 hover:text-ink-3"
       >
         {label}
-        <span className="text-[10px] text-neutral-400">{active ? (sort.direction === 'asc' ? '▲' : '▼') : '⇅'}</span>
+        <span className="text-[10px] text-ink-2">{active ? (sort.direction === 'asc' ? '▲' : '▼') : '⇅'}</span>
       </button>
     </th>
   );
@@ -360,14 +360,14 @@ export function DealsTable({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search customer, company, PIC, product…"
-          className="w-full max-w-xs rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900"
+          className="w-full max-w-xs field"
         />
-        <label className="flex items-center gap-1.5 text-xs text-neutral-500">
+        <label className="flex items-center gap-1.5 text-xs text-ink-2">
           Status
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-md border border-neutral-200 px-2 py-1 text-xs text-neutral-700"
+            className="rounded-md border border-line px-2 py-1 text-xs text-ink-3"
           >
             <option value="all">All</option>
             {statuses.map((s) => (
@@ -377,12 +377,12 @@ export function DealsTable({
             ))}
           </select>
         </label>
-        <label className="flex items-center gap-1.5 text-xs text-neutral-500">
+        <label className="flex items-center gap-1.5 text-xs text-ink-2">
           Rep
           <select
             value={repFilter}
             onChange={(e) => setRepFilter(e.target.value)}
-            className="rounded-md border border-neutral-200 px-2 py-1 text-xs text-neutral-700"
+            className="rounded-md border border-line px-2 py-1 text-xs text-ink-3"
           >
             <option value="all">All</option>
             <option value="unassigned">Unassigned</option>
@@ -393,12 +393,12 @@ export function DealsTable({
             ))}
           </select>
         </label>
-        <label className="flex items-center gap-1.5 text-xs text-neutral-500">
+        <label className="flex items-center gap-1.5 text-xs text-ink-2">
           Division
           <select
             value={divisionFilter}
             onChange={(e) => setDivisionFilter(e.target.value)}
-            className="rounded-md border border-neutral-200 px-2 py-1 text-xs text-neutral-700"
+            className="rounded-md border border-line px-2 py-1 text-xs text-ink-3"
           >
             <option value="all">All</option>
             {DIVISIONS.map((d) => (
@@ -411,12 +411,12 @@ export function DealsTable({
         <button
           type="button"
           onClick={exportDeals}
-          className="rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-50"
+          className="rounded-md border border-line bg-white px-3 py-1.5 text-sm text-ink-3 hover:bg-panel-2"
         >
           Export CSV
         </button>
         {hasActiveFilter && (
-          <span className="text-xs text-neutral-400">
+          <span className="text-xs text-ink-2">
             {filteredAndSorted.length} of {deals.length}
           </span>
         )}
@@ -458,18 +458,18 @@ export function DealsTable({
           >
             Apply
           </button>
-          <button type="button" onClick={() => setSelected(new Set())} className="ml-auto text-xs text-blue-700 hover:underline">
+          <button type="button" onClick={() => setSelected(new Set())} className="ml-auto text-xs text-accent hover:underline">
             Clear selection
           </button>
         </div>
       )}
 
       {filteredAndSorted.length === 0 ? (
-        <p className="text-sm text-neutral-500">No deals match this search.</p>
+        <p className="text-sm text-ink-2">No deals match this search.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white shadow-sm">
+        <div className="overflow-x-auto card">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+            <thead className="border-b border-line bg-panel-2 text-ink-2">
               <tr>
                 <th className="px-4 py-3 font-medium">
                   <SelectAllCheckbox
@@ -494,7 +494,7 @@ export function DealsTable({
                 <th className="px-4 py-3 font-medium"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody className="divide-y divide-divider">
               {filteredAndSorted.map((deal) => (
                 <tr key={deal.id} {...rowProps(deal.id)}>
                   <td className="px-4 py-3">
@@ -502,7 +502,7 @@ export function DealsTable({
                       type="checkbox"
                       checked={liveSelected.has(deal.id)}
                       onChange={(e) => toggleOne(deal.id, e.target.checked)}
-                      className="h-4 w-4 rounded border-neutral-300"
+                      className="h-4 w-4 rounded border-line"
                       aria-label={`Select deal for ${deal.customer_name}`}
                     />
                   </td>

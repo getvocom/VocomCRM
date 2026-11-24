@@ -29,35 +29,35 @@ export function ImportForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm"
+      className="mb-6 flex flex-wrap items-end gap-3 card p-5"
     >
       <div className="w-full sm:w-auto">
-        <label className="mb-1 block text-xs font-medium text-neutral-500">Source</label>
+        <label className="mb-1 block text-xs font-medium text-ink-2">Source</label>
         <input
           name="source"
           placeholder="e.g. Hunter, LinkedIn export"
           required
-          className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900 sm:w-48"
+          className="w-full field sm:w-48"
         />
       </div>
       <div className="w-full sm:w-auto">
-        <label className="mb-1 block text-xs font-medium text-neutral-500">CSV file</label>
+        <label className="mb-1 block text-xs font-medium text-ink-2">CSV file</label>
         <input
           type="file"
           name="file"
           accept=".csv"
           required
-          className="w-full text-sm file:mr-2 file:rounded-md file:border-0 file:bg-neutral-100 file:px-3 file:py-1.5 file:text-sm"
+          className="w-full text-sm file:mr-2 file:rounded-md file:border-0 file:bg-divider file:px-3 file:py-1.5 file:text-sm"
         />
       </div>
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-md bg-neutral-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-neutral-700 disabled:opacity-50 sm:w-auto"
+        className="w-full btn btn-primary sm:w-auto"
       >
         {submitting ? 'Importing...' : 'Import'}
       </button>
-      {status && <p className="w-full text-sm text-neutral-600">{status}</p>}
+      {status && <p className="w-full text-sm text-ink-3">{status}</p>}
     </form>
   );
 }

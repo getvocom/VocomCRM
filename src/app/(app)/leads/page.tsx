@@ -1,27 +1,44 @@
 import { AddLeadForm } from '@/components/add-lead-form';
-import { BarTrend } from '@/components/bar-trend';
-import { BreakdownBars } from '@/components/breakdown-bars';
 import { LeadsUploadForm } from '@/components/leads-upload-form';
+import { TabNav } from '@/components/ui';
 import { createClient } from '@/lib/supabase/server';
-import { LEAD_STATUSES, type Deal, type Lead, type Rep } from '@/lib/types';
+import { LEADS_SOURCE_TABS, type LeadsTabSlug } from '@/lib/lead-tabs';
+import {
+  LEADS_PAGE_SOURCES,
+  LEADS_UPLOAD_SOURCES,
+  LEAD_SOURCES,
+  LEAD_STATUSES,
+  type Deal,
+  type Lead,
+  type Rep
+} from '@/lib/types';
+import { LeadsHeader } from './lead-actions';
+import { LeadsOverview } from './overview';
 import { LeadsTable } from './table';
 
-const STATUS_COLORS: Record<string, string> = {
-  New: 'bg-neutral-500',
-  Contacted: 'bg-blue-500',
-  Qualified: 'bg-amber-500',
-  Won: 'bg-green-500',
-  Lost: 'bg-red-400'
-};
+export default async function LeadsPage({
+  searchParams
+}: {
+  searchParams: Promise<{ tab?: string; id?: string; hot?: string; q?: string }>;
+}) {
+  const params = await searchParams;
+  const sourceTab = LEADS_SOURCE_TABS.find((t) => t.slug === params.tab);
+  // No tab given: Overview, unless the link points at a specific lead (notification links
+  // are /leads?id=<lead>), in which case open the table so the row can be highlighted.
+  const tab: LeadsTabSlug = sourceTab
+    ? sourceTab.slug
+    : params.tab === 'all' || (params.tab !== 'overview' && (params.id || params.q))
+      ? 'all'
+      : 'overview';
 
-export default async function LeadsPage() {
   const supabase = await createClient();
-
   const [{ data: leads }, { data: reps }, { data: deals }] = await Promise.all([
     supabase
       .from('website_leads')
       .select('*')
-      .in('source', ['Website', 'Offline Event', 'Other'])
+      // Everything except Research. Referral and LinkedIn leads are listed here AND on
+      // their own pages: the same rows, so nothing is duplicated.
+      .neq('source', 'Research')
       .order('created_at', { ascending: false })
       .returns<Lead[]>(),
     supabase.from('reps').select('*').order('name').returns<Rep[]>(),
@@ -29,31 +46,62 @@ export default async function LeadsPage() {
   ]);
 
   const allLeads = leads ?? [];
-  const dailyPoints = allLeads.map((l) => ({ date: l.created_at, value: 1 }));
-  const statusBreakdown = LEAD_STATUSES.map((status) => ({
-    label: status,
-    count: allLeads.filter((l) => l.status === status).length,
-    colorClass: STATUS_COLORS[status]
-  }));
+  const tabLeads = sourceTab ? allLeads.filter((l) => l.source === sourceTab.source) : allLeads;
+
+  const tabs: { slug: LeadsTabSlug; label: string; count?: number }[] = [
+    { slug: 'overview', label: 'Overview' },
+    { slug: 'all', label: 'All leads', count: allLeads.length },
+    ...LEADS_SOURCE_TABS.map((t) => ({
+      slug: t.slug,
+      label: t.label,
+      count: allLeads.filter((l) => l.source === t.source).length
+    }))
+  ];
+
+  const defaultSource = sourceTab?.source ?? 'Other';
+  const defaultUploadSource = LEADS_UPLOAD_SOURCES.includes(defaultSource) ? defaultSource : 'Other';
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold text-neutral-900">Leads</h1>
-      <p className="mb-6 text-sm text-neutral-500">
-        The leads that need to be actively managed — website contact form and offline
-        event leads. Referrals, Research, and LinkedIn Outreach each have their own page
-        now (Sales → Referrals / Research, Marketing → LinkedIn Outreach).
-      </p>
+      <LeadsHeader
+        description={
+          <>
+            Every lead except Research. LinkedIn and Referral leads also have their own pages
+            (Marketing → LinkedIn Outreach, Sales → Referrals); they&apos;re the same rows, so an
+            edit in one place shows in the other.
+          </>
+        }
+        addForm={<AddLeadForm key={defaultSource} source={defaultSource} selectableSources={LEAD_SOURCES} />}
+        uploadForm={
+          <LeadsUploadForm key={defaultUploadSource} source={defaultUploadSource} selectableSources={LEADS_UPLOAD_SOURCES} />
+        }
+      />
 
-      <AddLeadForm source="Other" />
-      <LeadsUploadForm source="Other" />
+      <TabNav
+        label="Lead views"
+        items={tabs.map((t) => ({
+          href: `/leads?tab=${t.slug}`,
+          label: t.label,
+          count: t.count,
+          active: t.slug === tab
+        }))}
+      />
 
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <BarTrend title="New leads" data={dailyPoints} colorClass="bg-blue-500" />
-        <BreakdownBars title="By status" items={statusBreakdown} />
-      </div>
-
-      <LeadsTable leads={allLeads} reps={reps ?? []} deals={deals ?? []} statuses={LEAD_STATUSES} />
+      {tab === 'overview' ? (
+        <LeadsOverview leads={allLeads} />
+      ) : (
+        <LeadsTable
+          leads={tabLeads}
+          reps={reps ?? []}
+          deals={deals ?? []}
+          statuses={LEAD_STATUSES}
+          visibleSources={sourceTab ? [sourceTab.source] : LEADS_PAGE_SOURCES}
+          initialHotOnly={params.hot === '1'}
+          initialQuery={params.q ?? ''}
+          // Remount when the ⌘K search sends a new query, so the box picks it up.
+          key={params.q ?? ''}
+        />
+      )}
     </div>
   );
 }

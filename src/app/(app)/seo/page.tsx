@@ -1,4 +1,5 @@
 import { BarTrend } from '@/components/bar-trend';
+import { PageHeader } from '@/components/ui';
 import { createClient } from '@/lib/supabase/server';
 import type { SeoDailyTotal, SeoLandingPage, SeoMonthlyReport, SeoSearchQuery } from '@/lib/types';
 import { QueriesTable } from './queries-table';
@@ -81,37 +82,43 @@ export default async function SeoPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold text-neutral-900">SEO</h1>
-      <p className="mb-6 text-sm text-neutral-500">
-        Search Console + Analytics data for your own site — not competitor comparison
-        (neither API exposes that; would need a paid tool like Ahrefs/SEMrush on top of
-        this). &quot;Opportunities&quot; are queries with real impressions that aren&apos;t
-        ranking well yet. Note: the per-query table below will show lower click totals than
-        the chart above — Google itself hides which exact search term led to a click once
-        that term is rare enough to be identifying, so the site-wide total is always the
-        more accurate number.
-      </p>
+      <PageHeader
+        group="Marketing"
+        title="SEO"
+        className="mb-6"
+        description={
+          <>
+            Search Console + Analytics data for your own site — not competitor comparison
+            (neither API exposes that; would need a paid tool like Ahrefs/SEMrush on top of
+            this). &quot;Opportunities&quot; are queries with real impressions that aren&apos;t
+            ranking well yet. Note: the per-query table below will show lower click totals than
+            the chart above — Google itself hides which exact search term led to a click once
+            that term is rare enough to be identifying, so the site-wide total is always the
+            more accurate number.
+          </>
+        }
+      />
 
       {latestReport ? (
-        <div className="mb-6 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+        <div className="mb-6 rounded-xl border border-line bg-panel p-5">
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-neutral-900">
+            <h2 className="text-sm font-semibold text-ink">
               Monthly report —{' '}
               {new Date(latestReport.month).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
             </h2>
-            <span className="text-xs text-neutral-400">
+            <span className="text-xs text-ink-2">
               generated {new Date(latestReport.generated_at).toLocaleDateString()}
             </span>
           </div>
-          <p className="mb-4 text-sm text-neutral-700">{latestReport.summary}</p>
+          <p className="mb-4 text-sm text-ink-3">{latestReport.summary}</p>
           {latestReport.content_suggestions.length > 0 && (
             <div>
-              <p className="mb-2 text-xs font-medium text-neutral-500">Suggested blog titles</p>
+              <p className="mb-2 text-xs font-medium text-ink-2">Suggested blog titles</p>
               <ul className="space-y-2">
                 {latestReport.content_suggestions.map((s, i) => (
-                  <li key={i} className="rounded-md bg-neutral-50 p-3 text-sm">
-                    <p className="font-medium text-neutral-900">{s.title}</p>
-                    <p className="text-xs text-neutral-500">
+                  <li key={i} className="rounded-md bg-panel-2 p-3 text-sm">
+                    <p className="font-medium text-ink">{s.title}</p>
+                    <p className="text-xs text-ink-2">
                       {s.reason} — based on &quot;{s.based_on_query}&quot;
                     </p>
                   </li>
@@ -121,28 +128,28 @@ export default async function SeoPage() {
           )}
         </div>
       ) : (
-        <div className="mb-6 rounded-xl border border-neutral-200 bg-white p-5 text-sm text-neutral-500 shadow-sm">
+        <div className="mb-6 rounded-xl border border-line bg-panel p-5 text-sm text-ink-2">
           No monthly report yet — generates automatically once Search Console data is
           flowing (see setup below) and runs on the 1st query of each month.
         </div>
       )}
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <BarTrend title="Clicks" data={clicksByDay} colorClass="bg-blue-500" />
-        <BarTrend title="Impressions" data={impressionsByDay} colorClass="bg-neutral-400" />
-        <BarTrend title="Sessions" data={sessionsByDay} colorClass="bg-green-500" />
+        <BarTrend title="Clicks" data={clicksByDay} colorClass="bg-chart-blue" />
+        <BarTrend title="Impressions" data={impressionsByDay} colorClass="bg-chart-grey" />
+        <BarTrend title="Sessions" data={sessionsByDay} colorClass="bg-chart-green" />
       </div>
 
-      <div className="mb-6 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-        <p className="mb-2 text-sm text-neutral-500">Top landing pages</p>
+      <div className="mb-6 card p-5">
+        <p className="mb-2 text-sm text-ink-2">Top landing pages</p>
         <ul className="space-y-1 text-sm">
           {topPages.length === 0 ? (
-            <li className="text-neutral-400">No traffic data yet</li>
+            <li className="text-ink-2">No traffic data yet</li>
           ) : (
             topPages.map(([path, sessions]) => (
               <li key={path} className="flex justify-between gap-2">
-                <span className="truncate text-neutral-700">{path}</span>
-                <span className="shrink-0 text-neutral-400">{sessions}</span>
+                <span className="truncate text-ink-3">{path}</span>
+                <span className="shrink-0 text-ink-2">{sessions}</span>
               </li>
             ))
           )}

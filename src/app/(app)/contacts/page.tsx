@@ -1,17 +1,18 @@
 import { BreakdownBars } from '@/components/breakdown-bars';
+import { PageHeader } from '@/components/ui';
 import { createClient } from '@/lib/supabase/server';
 import type { MasterContact } from '@/lib/types';
 import { ImportForm } from './import-form';
 import { ContactsTable } from './table';
 
 const FIXED_SOURCES = [
-  { label: 'Website', colorClass: 'bg-blue-500' },
-  { label: 'Offline Event', colorClass: 'bg-purple-500' },
-  { label: 'Referral', colorClass: 'bg-green-500' },
-  { label: 'Research', colorClass: 'bg-amber-500' },
-  { label: 'Other', colorClass: 'bg-neutral-400' },
-  { label: 'Instantly', colorClass: 'bg-purple-700' },
-  { label: 'LinkedIn Activity', colorClass: 'bg-sky-500' }
+  { label: 'Website', colorClass: 'bg-chart-blue' },
+  { label: 'Offline Event', colorClass: 'bg-chart-teal' },
+  { label: 'Referral', colorClass: 'bg-chart-purple' },
+  { label: 'Research', colorClass: 'bg-chart-amber' },
+  { label: 'Other', colorClass: 'bg-chart-grey' },
+  { label: 'Instantly', colorClass: 'bg-chart-orange' },
+  { label: 'LinkedIn Activity', colorClass: 'bg-chart-sky' }
 ];
 
 const PAGE_SIZE = 100;
@@ -59,18 +60,17 @@ export default async function ContactsPage({
 
   const sourceBreakdown = [
     ...FIXED_SOURCES.map((s, i) => ({ label: s.label, count: sourceCounts[i].count ?? 0, colorClass: s.colorClass })),
-    { label: 'Imported (CSV)', count: importedCount, colorClass: 'bg-neutral-500' }
+    { label: 'Imported (CSV)', count: importedCount, colorClass: 'bg-chart-grey' }
   ];
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold text-neutral-900">Contacts</h1>
-      <p className="mb-6 text-sm text-neutral-500">
-        Every contact this CRM has ever touched — leads, Instantly leads, LinkedIn activity,
-        and anything imported below (Hunter.io exports, LinkedIn Sales Navigator lists,
-        etc). Not deduplicated across sources — same person from two places shows twice,
-        tagged by source.
-      </p>
+      <PageHeader
+        group="General"
+        title="Contacts"
+        className="mb-6"
+        description="Every contact this CRM has ever touched — leads, Instantly leads, LinkedIn activity, and anything imported below (Hunter.io exports, LinkedIn Sales Navigator lists, etc). Not deduplicated across sources — same person from two places shows twice, tagged by source."
+      />
 
       <div className="mb-6 max-w-md">
         <BreakdownBars title={`By source (${(allCount ?? 0).toLocaleString()} total)`} items={sourceBreakdown} />

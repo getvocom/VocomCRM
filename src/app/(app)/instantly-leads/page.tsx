@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { PageHeader } from '@/components/ui';
 import { LEAD_STATUSES, type InstantlyLead, type Rep } from '@/lib/types';
 import { CAMPAIGN_STATUS_FILTERS, INTEREST_FILTERS, SEQUENCE_STATUS_FILTERS } from './constants';
 import { SyncNowButton } from './sync-button';
@@ -115,15 +116,19 @@ export default async function InstantlyLeadsPage({
 
   return (
     <div>
-      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-neutral-900">Instantly Leads</h1>
-        <SyncNowButton />
-      </div>
-      <p className="mb-6 text-sm text-neutral-500">
-        Synced daily from your Instantly campaigns — interest status, phone, and LinkedIn
-        come straight from Instantly&apos;s own reply classification. Use Sync Now if
-        today&apos;s automatic sync hasn&apos;t run yet.
-      </p>
+      <PageHeader
+        group="Marketing"
+        title="Instantly Leads"
+        className="mb-6"
+        description={
+          <>
+            Synced daily from your Instantly campaigns — interest status, phone, and LinkedIn
+            come straight from Instantly&apos;s own reply classification. Use Sync Now if
+            today&apos;s automatic sync hasn&apos;t run yet.
+          </>
+        }
+        actions={<SyncNowButton />}
+      />
       <InstantlyLeadsTable
         leads={leads ?? []}
         reps={reps ?? []}

@@ -32,12 +32,16 @@ export function NotesButton({
   return (
     <>
       <button
+        type="button"
         onClick={handleOpen}
-        className={`rounded-md px-2 py-1 text-xs font-medium ${
-          notes ? 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200' : 'text-neutral-400 hover:text-neutral-600'
-        }`}
+        aria-label={notes ? `Open notes for ${title}` : `Add a note for ${title}`}
+        title={notes ?? undefined}
+        className="flex h-7 max-w-[220px] items-center gap-1.5 rounded-[7px] px-2 text-[13px] text-ink-2 hover:bg-divider hover:text-ink"
       >
-        {notes ? 'View note' : '+ Note'}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinejoin="round" className="shrink-0" aria-hidden="true">
+          <path d="M4 4h16v12H8l-4 4z" />
+        </svg>
+        <span className="truncate">{notes ? notes : '+ Note'}</span>
       </button>
       {open && (
         <div
@@ -45,16 +49,26 @@ export function NotesButton({
           onClick={() => setOpen(false)}
         >
           <div
-            className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Notes for ${title}`}
+            className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-[14px] bg-panel p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-3 flex items-start justify-between">
               <div>
-                <h3 className="text-base font-semibold text-neutral-900">{title}</h3>
-                {subtitle && <p className="text-xs text-neutral-500">{subtitle}</p>}
+                <h3 className="text-base font-semibold text-ink">{title}</h3>
+                {subtitle && <p className="text-xs text-ink-2">{subtitle}</p>}
               </div>
-              <button onClick={() => setOpen(false)} className="text-neutral-400 hover:text-neutral-700">
-                ✕
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Close"
+                className="flex h-7 w-7 items-center justify-center rounded-[7px] text-ink-2 hover:bg-divider hover:text-ink"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
               </button>
             </div>
             <textarea
@@ -63,19 +77,22 @@ export function NotesButton({
               rows={8}
               placeholder="Add a note…"
               autoFocus
-              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900"
+              aria-label="Note"
+              className="field h-auto w-full py-2"
             />
             <div className="mt-3 flex justify-end gap-2">
               <button
                 onClick={() => setOpen(false)}
-                className="rounded-md px-3 py-1.5 text-sm text-neutral-500 hover:bg-neutral-100"
+                type="button"
+                className="btn"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
                 disabled={isPending}
-                className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-neutral-700 disabled:opacity-50"
+                type="button"
+                className="btn btn-primary"
               >
                 {isPending ? 'Saving…' : 'Save'}
               </button>

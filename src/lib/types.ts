@@ -1,5 +1,14 @@
 export type LeadStatus = 'New' | 'Contacted' | 'Qualified' | 'Won' | 'Lost';
-export type LeadSource = 'Website' | 'Offline Event' | 'Referral' | 'Research' | 'LinkedIn' | 'Other';
+export type LeadSource =
+  | 'Website'
+  | 'Offline Event'
+  | 'Referral'
+  | 'Research'
+  | 'LinkedIn'
+  // Warm replies from an Instantly campaign that someone flags by hand. The full list of
+  // everyone emailed stays in instantly_leads (/instantly-leads).
+  | 'Cold Email'
+  | 'Other';
 // Where a deal originally came from. Same as LeadSource plus Instantly (cold-email campaigns),
 // which live in their own table rather than website_leads.
 export type DealSource = LeadSource | 'Instantly';
@@ -13,7 +22,26 @@ export type DealStatus = 'Prospecting' | 'Connected' | 'Conversation' | 'Meeting
 export type LinkedInActivityType = 'Follow' | 'Visit' | 'Like';
 
 export const LEAD_STATUSES: LeadStatus[] = ['New', 'Contacted', 'Qualified', 'Won', 'Lost'];
-export const LEAD_SOURCES: LeadSource[] = ['Website', 'Offline Event', 'Referral', 'Research', 'LinkedIn', 'Other'];
+export const LEAD_SOURCES: LeadSource[] = [
+  'Website',
+  'Cold Email',
+  'Offline Event',
+  'Referral',
+  'Research',
+  'LinkedIn',
+  'Other'
+];
+// Sources listed on the Leads page: everything except Research, which keeps its own page.
+// LinkedIn and Referral leads ALSO have their own pages (same rows, not copies).
+export const LEADS_PAGE_SOURCES: LeadSource[] = LEAD_SOURCES.filter((s) => s !== 'Research');
+// Sources a CSV can be uploaded as from the Leads page. LinkedIn uploads go through
+// LinkedIn Outreach (different dedupe), Research through the Research page.
+export const LEADS_UPLOAD_SOURCES: LeadSource[] = ['Website', 'Cold Email', 'Offline Event', 'Referral', 'Other'];
+// The Dashboard's "Website leads received" chart still charts the pre-tabs Leads set
+// (everything except Referral, Research and LinkedIn), as a PostgREST list for
+// .not('source', 'in', ...). Filtering by exclusion means the query never names
+// 'Cold Email', which Postgres rejects outright on a database without migration_022.
+export const DIRECT_LEADS_EXCLUDED_FILTER = '(Referral,Research,LinkedIn)';
 export const LEAD_PRIORITIES: LeadPriority[] = ['Low', 'Medium', 'High'];
 export const LEAD_PHASES: LeadPhase[] = ['Rep Assigned', 'Cynthia Follow-up', 'Escalated to Cold Call'];
 export const DEAL_STATUSES: DealStatus[] = [

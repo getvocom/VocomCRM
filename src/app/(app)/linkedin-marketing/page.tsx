@@ -1,4 +1,5 @@
 import { BarTrend } from '@/components/bar-trend';
+import { PageHeader } from '@/components/ui';
 import { createClient } from '@/lib/supabase/server';
 import type { LinkedInAudienceStat, LinkedInDailyStat } from '@/lib/types';
 import { AudienceBreakdown } from './audience-breakdown';
@@ -14,13 +15,19 @@ export default async function LinkedInMarketingPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold text-neutral-900">LinkedIn Marketing Data</h1>
-      <p className="mb-6 text-sm text-neutral-500">
-        LinkedIn only lets you export aggregate counts and demographics, not names — get
-        these from your Page admin: Analytics &rarr; Followers / Visitors &rarr; Export.
-        Upload the same files again later to add new days; existing days get updated, not
-        duplicated.
-      </p>
+      <PageHeader
+        group="Marketing"
+        title="LinkedIn Marketing Data"
+        className="mb-6"
+        description={
+          <>
+            LinkedIn only lets you export aggregate counts and demographics, not names — get
+            these from your Page admin: Analytics &rarr; Followers / Visitors &rarr; Export.
+            Upload the same files again later to add new days; existing days get updated, not
+            duplicated.
+          </>
+        }
+      />
 
       <UploadForm />
 
@@ -28,21 +35,21 @@ export default async function LinkedInMarketingPage() {
         <BarTrend
           title="New followers"
           data={(dailyStats ?? []).map((s) => ({ date: s.date, value: s.new_followers }))}
-          colorClass="bg-blue-500"
+          colorClass="bg-chart-blue"
         />
         <BarTrend
           title="Unique visitors"
           data={(dailyStats ?? []).map((s) => ({ date: s.date, value: s.unique_visitors }))}
-          colorClass="bg-green-500"
+          colorClass="bg-chart-green"
         />
       </div>
 
-      <h2 className="mb-3 text-sm font-semibold text-neutral-900">Follower demographics</h2>
+      <h2 className="mb-3 text-sm font-semibold text-ink">Follower demographics</h2>
       <div className="mb-6">
         <AudienceBreakdown stats={audienceStats ?? []} source="followers" />
       </div>
 
-      <h2 className="mb-3 text-sm font-semibold text-neutral-900">Visitor demographics</h2>
+      <h2 className="mb-3 text-sm font-semibold text-ink">Visitor demographics</h2>
       <AudienceBreakdown stats={audienceStats ?? []} source="visitors" />
     </div>
   );

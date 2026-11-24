@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from 'react';
 import { addVendor, deleteVendor, updateVendor } from '@/app/actions';
+import { PageHeader } from '@/components/ui';
 import {
   VENDOR_KINDS,
   VENDOR_RELATIONSHIPS,
@@ -30,14 +31,16 @@ export function VendorsView({ vendors, quoteCounts }: { vendors: Vendor[]; quote
 
   return (
     <div className="opp">
-      <div className="top">
-        <div>
-          <h1>Vendors</h1>
-          <p className="sub">
+      <PageHeader
+        group="Sales"
+        title="Vendors"
+        description={
+          <>
             Suppliers and partners we quote from: manufacturers, trading companies, optics makers and site owners.{' '}
             {vendors.length} on file.
-          </p>
-        </div>
+          </>
+        }
+        actions={
         <form
           className="tools"
           onSubmit={(e) => {
@@ -52,13 +55,21 @@ export function VendorsView({ vendors, quoteCounts }: { vendors: Vendor[]; quote
         >
           <input className="search" placeholder="New vendor name" value={name} onChange={(e) => setName(e.target.value)} aria-label="New vendor name" />
           <button type="submit" className="btn primary" disabled={pending || !name.trim()}>
-            Add vendor
+            + Add vendor
           </button>
         </form>
-      </div>
+        }
+      />
 
       <div className="filters">
-        <input className="search" type="search" placeholder="Search vendors, products, locations…" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <input
+          className="search"
+          type="search"
+          placeholder="Search vendors, products, locations…"
+          aria-label="Search vendors"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         <select value={kind} onChange={(e) => setKind(e.target.value)} aria-label="Kind">
           <option value="All">Kind: any</option>
           {VENDOR_KINDS.map((k) => (
@@ -81,7 +92,7 @@ export function VendorsView({ vendors, quoteCounts }: { vendors: Vendor[]; quote
           {shown.map((v) => (
             <button type="button" key={v.id} className="vcard" onClick={() => setOpenId(v.id)}>
               <span style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                <b style={{ color: 'var(--o-accent)' }}>{v.name}</b>
+                <b style={{ fontSize: 15, fontWeight: 600 }}>{v.name}</b>
                 {v.relationship && (
                   <span className={`chip ${v.relationship === 'Active' ? 'ok' : v.relationship === 'Prospect' ? 'warn' : ''}`}>{v.relationship}</span>
                 )}

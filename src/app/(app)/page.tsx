@@ -1,9 +1,10 @@
 import Link from 'next/link';
+import { PageHeader } from '@/components/ui';
 import { BarTrend } from '@/components/bar-trend';
 import { BreakdownBars } from '@/components/breakdown-bars';
 import { formatCompact } from '@/lib/format';
 import { createClient } from '@/lib/supabase/server';
-import { ACTIVITY_TYPES } from '@/lib/types';
+import { ACTIVITY_TYPES, DIRECT_LEADS_EXCLUDED_FILTER } from '@/lib/types';
 import { InterestBreakdown } from './interest-breakdown';
 
 const INTEREST_LABELS = [
@@ -36,7 +37,8 @@ export default async function DashboardPage() {
     supabase
       .from('website_leads')
       .select('*', { count: 'exact', head: true })
-      .in('source', ['Website', 'Offline Event', 'Other']),
+      // Same set as the Leads page: everything except Research.
+      .neq('source', 'Research'),
     supabase.from('website_leads').select('*', { count: 'exact', head: true }).eq('source', 'LinkedIn'),
     supabase.from('instantly_leads').select('*', { count: 'exact', head: true }),
     supabase.from('linkedin_activity').select('*', { count: 'exact', head: true }),
@@ -55,7 +57,7 @@ export default async function DashboardPage() {
       .select('*', { count: 'exact', head: true })
       .not('status', 'in', '("Resolved","Won\'t Fix")'),
     supabase.from('instantly_leads').select('last_reply_at').not('last_reply_at', 'is', null),
-    supabase.from('website_leads').select('created_at').in('source', ['Website', 'Offline Event', 'Other']),
+    supabase.from('website_leads').select('created_at').not('source', 'in', DIRECT_LEADS_EXCLUDED_FILTER),
     supabase.from('linkedin_activity').select('activity'),
     ...INTEREST_LABELS.map((label) =>
       supabase
@@ -93,16 +95,16 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-xl font-semibold text-neutral-900">Dashboard</h1>
+      <PageHeader group="General" title="Dashboard" className="mb-6" />
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         {tiles.map((tile) => (
           <Link
             key={tile.label}
             href={tile.href}
-            className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:border-neutral-300"
+            className="card p-5 transition hover:border-ink-2/40"
           >
-            <p className="text-sm text-neutral-500">{tile.label}</p>
-            <p className="mt-1 truncate text-2xl font-semibold text-neutral-900 sm:text-3xl" title={String(tile.count)}>
+            <p className="text-sm text-ink-2">{tile.label}</p>
+            <p className="mt-1 truncate text-2xl font-semibold text-ink sm:text-3xl" title={String(tile.count)}>
               {tile.count}
             </p>
           </Link>
@@ -110,8 +112,8 @@ export default async function DashboardPage() {
       </div>
 
       <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <BarTrend title="Instantly replies received" data={replyPoints} colorClass="bg-red-500" />
-        <BarTrend title="Website leads received" data={websiteLeadPoints} colorClass="bg-blue-500" />
+        <BarTrend title="Instantly replies received" data={replyPoints} colorClass="bg-chart-red" />
+        <BarTrend title="Website leads received" data={websiteLeadPoints} colorClass="bg-chart-blue" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { STATUS_COLORS } from '@/components/status-select';
+import { StatCard } from '@/components/ui';
+import { chartClass } from '@/lib/pill-colors';
 import { ValueBreakdown } from '@/components/value-breakdown';
 import { formatCompact } from '@/lib/format';
 import { quarterLabel } from '@/lib/quarter';
@@ -55,7 +56,7 @@ export function SalesDashboardClient({ deals, accounts }: { deals: Deal[]; accou
     }
     const items = [...byQuarter.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([label, { value, count }]) => ({ label, value, count, colorClass: 'bg-green-100 text-green-700' }));
+      .map(([label, { value, count }]) => ({ label, value, count, colorClass: chartClass('Won') }));
 
     return {
       items,
@@ -72,7 +73,7 @@ export function SalesDashboardClient({ deals, accounts }: { deals: Deal[]; accou
           label: status,
           value: rows.reduce((s, d) => s + d.value, 0),
           count: rows.length,
-          colorClass: STATUS_COLORS[status]
+          colorClass: chartClass(status)
         };
       }),
     [filteredDeals]
@@ -106,7 +107,7 @@ export function SalesDashboardClient({ deals, accounts }: { deals: Deal[]; accou
         label,
         value,
         count,
-        colorClass: STATUS_COLORS[label] ?? 'bg-neutral-100 text-neutral-700'
+        colorClass: chartClass(label)
       }));
   }, [filteredDeals, accountById]);
 
@@ -127,7 +128,7 @@ export function SalesDashboardClient({ deals, accounts }: { deals: Deal[]; accou
         label,
         value,
         count,
-        colorClass: STATUS_COLORS[label] ?? 'bg-neutral-100 text-neutral-700'
+        colorClass: chartClass(label)
       }));
   }, [filteredDeals]);
 
@@ -165,13 +166,13 @@ export function SalesDashboardClient({ deals, accounts }: { deals: Deal[]; accou
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-1.5 text-xs text-neutral-500">
+      <div className="mb-6 mt-6 flex flex-wrap items-center gap-3">
+        <label className="flex items-center gap-2 text-[13px] text-ink-2">
           Division
           <select
             value={divisionFilter}
             onChange={(e) => setDivisionFilter(e.target.value)}
-            className="rounded-md border border-neutral-200 px-2 py-1 text-xs text-neutral-700"
+            className="btn cursor-pointer pr-2"
           >
             <option value="all">All</option>
             {DIVISIONS.map((d) => (
@@ -181,72 +182,66 @@ export function SalesDashboardClient({ deals, accounts }: { deals: Deal[]; accou
             ))}
           </select>
         </label>
-        <label className="flex items-center gap-1.5 text-xs text-neutral-500">
+        <label className="flex items-center gap-2 text-[13px] text-ink-2">
           Start date from
           <input
             type="date"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
-            className="rounded-md border border-neutral-200 px-2 py-1 text-xs text-neutral-700"
+            className="field"
           />
         </label>
-        <label className="flex items-center gap-1.5 text-xs text-neutral-500">
+        <label className="flex items-center gap-2 text-[13px] text-ink-2">
           to
           <input
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
-            className="rounded-md border border-neutral-200 px-2 py-1 text-xs text-neutral-700"
+            className="field"
           />
         </label>
       </div>
 
-      <div className="mb-4 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-        <h3 className="mb-1 text-sm font-medium text-neutral-700">
+      <section className="card mb-4 p-5">
+        <h2 className="mb-1 text-[15px] font-semibold text-ink">
           Stalled Deals (open, no stage change in {STALE_DAYS_THRESHOLD}+ days)
-        </h3>
+        </h2>
         {stalledDeals.length === 0 ? (
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-ink-2">
             No open deal has sat in its current stage past {STALE_DAYS_THRESHOLD} days — pipeline looks healthy.
           </p>
         ) : (
-          <div className="mt-2 divide-y divide-neutral-100">
+          <div className="mt-2 divide-y divide-divider">
             {stalledDeals.map(({ deal, days }) => (
               <Link
                 key={deal.id}
                 href={`/deals?id=${deal.id}`}
-                className="grid grid-cols-[minmax(0,1fr)_5.5rem_2.5rem_4.5rem] items-center gap-2 py-2 text-sm hover:bg-neutral-50 sm:grid-cols-[minmax(0,1fr)_7rem_3rem_5rem] sm:gap-3"
+                className="grid grid-cols-[minmax(0,1fr)_5.5rem_2.5rem_4.5rem] items-center gap-2 rounded-md py-2 text-sm hover:bg-panel-2 sm:grid-cols-[minmax(0,1fr)_7rem_3rem_5rem] sm:gap-3"
               >
-                <span className="truncate font-medium text-neutral-900">{deal.customer_name}</span>
-                <span className="truncate text-neutral-500">{deal.status}</span>
-                <span className={`text-right ${days > 70 ? 'font-semibold text-red-600' : 'font-medium text-amber-600'}`}>
+                <span className="truncate font-medium text-ink">{deal.customer_name}</span>
+                <span className="truncate text-ink-2">{deal.status}</span>
+                <span className={`text-right ${days > 70 ? 'font-semibold text-pill-red-ink' : 'font-medium text-pill-amber-ink'}`}>
                   {days}d
                 </span>
-                <span className="text-right tabular-nums text-neutral-500">{formatCompact(deal.value)}</span>
+                <span className="text-right tabular-nums text-ink-2">{formatCompact(deal.value)}</span>
               </Link>
             ))}
           </div>
         )}
-      </div>
+      </section>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <ValueBreakdown title={quarterBreakdown.title} items={quarterBreakdown.items} />
         <ValueBreakdown title="Open Pipeline by Stage" items={stageBreakdown} />
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-            <p className="text-sm text-neutral-500">Total Sales</p>
-            <p className="mt-1 truncate text-2xl font-semibold text-neutral-900 sm:text-3xl">{formatCompact(totalSales)}</p>
-          </div>
-          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-            <p className="text-sm text-neutral-500">Total Potential Sales</p>
-            <p className="mt-1 truncate text-2xl font-semibold text-neutral-900 sm:text-3xl">{formatCompact(totalPotentialSales)}</p>
-          </div>
+          <StatCard label="Total Sales" value={formatCompact(totalSales)} />
+          <StatCard label="Total Potential Sales" value={formatCompact(totalPotentialSales)} />
         </div>
 
         <ValueBreakdown title="Won + Open Pipeline Value by Region (Lost excluded)" items={regionBreakdown} />
         <div>
           <ValueBreakdown title="Won + Open Pipeline Value by Lead Source (Lost excluded)" items={sourceBreakdown} />
-          <p className="mt-1 text-xs text-neutral-400">
+          <p className="mt-2 text-xs text-ink-2">
             Most deals currently show &quot;Not recorded&quot; — lead source wasn&apos;t captured on
             deals created before this feature; new deals will populate it going forward.
           </p>

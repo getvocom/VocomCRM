@@ -20,7 +20,7 @@ function ValueCell({ value, onChange }: { value: number; onChange: (value: numbe
         const n = Number(e.target.value);
         if (!Number.isNaN(n) && n !== value) startTransition(() => onChange(n));
       }}
-      className="w-28 rounded-md border border-neutral-300 px-2 py-1 text-sm text-neutral-900 disabled:opacity-50"
+      className="w-28 cell-input"
     />
   );
 }
@@ -35,59 +35,59 @@ export function AccountDealsTable({
   leadCountByDeal: Map<string, number>;
 }) {
   if (deals.length === 0) {
-    return <p className="text-sm text-neutral-500">No deals linked to this account yet — link one from the Deals page.</p>;
+    return <p className="text-sm text-ink-2">No deals linked to this account yet — link one from the Deals page.</p>;
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white shadow-sm">
-      <table className="w-full text-left text-sm">
-        <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+    <div className="table-shell">
+      <table>
+        <thead>
           <tr>
-            <th className="px-4 py-3 font-medium">Customer</th>
-            <th className="px-4 py-3 font-medium">Product / Order</th>
-            <th className="px-4 py-3 font-medium">Value</th>
-            <th className="px-4 py-3 font-medium">Notes</th>
-            <th className="px-4 py-3 font-medium">Leads</th>
-            <th className="px-4 py-3 font-medium">Assigned Rep</th>
-            <th className="px-4 py-3 font-medium">Status</th>
-            <th className="px-4 py-3 font-medium"></th>
+            <th>Customer</th>
+            <th>Product / Order</th>
+            <th>Value</th>
+            <th>Notes</th>
+            <th>Leads</th>
+            <th>Assigned Rep</th>
+            <th>Status</th>
+            <th></th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-100">
+        <tbody>
           {deals.map((deal) => (
             <tr key={deal.id}>
-              <td className="px-4 py-3 text-neutral-900">
+              <td className="text-ink">
                 <Link href={`/deals?id=${deal.id}`} className="hover:underline">
                   {deal.customer_name}
                 </Link>
               </td>
-              <td className="px-4 py-3 text-neutral-600">{deal.product || '—'}</td>
-              <td className="px-4 py-3">
+              <td className="text-ink-3">{deal.product || '—'}</td>
+              <td>
                 <ValueCell value={deal.value} onChange={(value) => updateDeal(deal.id, { value })} />
               </td>
-              <td className="px-4 py-3">
+              <td>
                 <NotesButton
                   title={deal.customer_name}
                   notes={deal.notes}
                   onSave={(notes) => updateDeal(deal.id, { notes })}
                 />
               </td>
-              <td className="px-4 py-3 text-neutral-600">{leadCountByDeal.get(deal.id) ?? 0}</td>
-              <td className="px-4 py-3">
+              <td className="text-ink-3">{leadCountByDeal.get(deal.id) ?? 0}</td>
+              <td>
                 <RepSelect
                   reps={reps}
                   value={deal.assigned_rep_id}
                   onChange={(repId) => updateDeal(deal.id, { assigned_rep_id: repId })}
                 />
               </td>
-              <td className="px-4 py-3">
+              <td>
                 <StatusSelect
                   options={DEAL_PIPELINE_STATUSES}
                   value={deal.status}
                   onChange={(status) => updateDeal(deal.id, { status: status as Deal['status'] })}
                 />
               </td>
-              <td className="px-4 py-3">
+              <td>
                 <DeleteButton
                   onDelete={() => deleteDeal(deal.id)}
                   confirmMessage={`Delete the deal with ${deal.customer_name}? This can't be undone.`}

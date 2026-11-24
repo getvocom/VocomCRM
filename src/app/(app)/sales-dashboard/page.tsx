@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/ui';
 import { createClient } from '@/lib/supabase/server';
 import type { Account, Deal } from '@/lib/types';
 import { SalesDashboardClient } from './sales-dashboard-client';
@@ -12,11 +13,11 @@ export default async function SalesDashboardPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold text-neutral-900">Sales Dashboard</h1>
-      <p className="mb-6 text-sm text-neutral-500">
-        Pipeline value, revenue, and breakdowns across the sales team. Built on our own
-        deal data — see each component&apos;s title for exactly what it includes.
-      </p>
+      <PageHeader
+        group="Sales"
+        title="Sales Dashboard"
+        description="Pipeline value, revenue, and breakdowns across the sales team. Built on our own deal data — see each component's title for exactly what it includes."
+      />
       <SalesDashboardClient deals={deals ?? []} accounts={accounts ?? []} />
     </div>
   );

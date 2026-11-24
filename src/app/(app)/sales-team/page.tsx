@@ -1,6 +1,7 @@
 import { addRep, deleteRep } from '@/app/actions';
 import { BreakdownBars } from '@/components/breakdown-bars';
 import { DeleteButton } from '@/components/delete-button';
+import { PageHeader } from '@/components/ui';
 import { createClient } from '@/lib/supabase/server';
 import type { Rep } from '@/lib/types';
 
@@ -29,22 +30,24 @@ export default async function SalesTeamPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold text-neutral-900">Sales Team</h1>
-      <p className="mb-6 text-sm text-neutral-500">
-        Add a rep here and they immediately show up in every Assigned Rep dropdown.
-      </p>
+      <PageHeader
+        group="General"
+        title="Sales Team"
+        className="mb-6"
+        description="Add a rep here and they immediately show up in every Assigned Rep dropdown."
+      />
 
       <form
         action={addRep}
-        className="mb-6 flex items-end gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm"
+        className="mb-6 flex items-end gap-3 card p-5"
       >
         <div>
-          <label className="mb-1 block text-xs font-medium text-neutral-500">Rep name</label>
-          <input name="name" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900" />
+          <label className="mb-1 block text-xs font-medium text-ink-2">Rep name</label>
+          <input name="name" required aria-label="Rep name" className="field" />
         </div>
         <button
           type="submit"
-          className="rounded-md bg-neutral-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-neutral-700"
+          className="btn btn-primary"
         >
           Add rep
         </button>
@@ -56,9 +59,9 @@ export default async function SalesTeamPage() {
         </div>
       )}
 
-      <ul className="divide-y divide-neutral-100 rounded-xl border border-neutral-200 bg-white shadow-sm">
+      <ul className="card divide-y divide-divider overflow-hidden">
         {allReps.map((rep) => (
-          <li key={rep.id} className="flex items-center justify-between px-4 py-3 text-sm text-neutral-900">
+          <li key={rep.id} className="flex items-center justify-between px-4 py-3 text-sm text-ink">
             {rep.name}
             <DeleteButton
               onDelete={deleteRep.bind(null, rep.id)}
