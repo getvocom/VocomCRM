@@ -1,5 +1,4 @@
 import '@/components/opp/opp.css';
-import { oppFontClasses } from '@/lib/opp-fonts';
 import { createClient } from '@/lib/supabase/server';
 import type { Deal, Vendor } from '@/lib/types';
 import { VendorsView } from './vendors-view';
@@ -21,7 +20,7 @@ export default async function VendorsPage() {
   });
 
   return (
-    <div className={oppFontClasses}>
+    <div>
       <VendorsView vendors={vendors ?? []} quoteCounts={quoteCounts} />
     </div>
   );

@@ -2,7 +2,6 @@ import '@/components/opp/opp.css';
 import { StatCard } from '@/components/ui';
 import { formatCompact } from '@/lib/format';
 import { createClient } from '@/lib/supabase/server';
-import { oppFontClasses } from '@/lib/opp-fonts';
 import { DEAL_PIPELINE_STATUSES, type Account, type Deal, type Rep } from '@/lib/types';
 import { AddDealForm } from './add-deal-form';
 import { OpportunitiesWorkspace } from './opportunities-workspace';
@@ -45,7 +44,7 @@ export default async function DealsPage() {
   );
 
   return (
-    <div className={oppFontClasses}>
+    <div>
       <OpportunitiesWorkspace deals={allDeals} accounts={accounts ?? []} reps={reps ?? []} tableView={tableView} />
     </div>
   );

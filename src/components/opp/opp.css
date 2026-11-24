@@ -21,8 +21,7 @@
 .opp button, .opp input, .opp select, .opp textarea { font: inherit; color: inherit; }
 .opp button { cursor: pointer; }
 .opp :focus-visible { outline: 2px solid var(--o-accent); outline-offset: 2px; }
-/* Deals uses the shared PageHeader. Vendors still has its own title inside .top until it is reskinned. */
-.opp .top h1 { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.25; margin: 0; }
+/* Page titles come from the shared PageHeader (Tailwind), so there is no .opp h1 rule. */
 .opp .sub { margin: 2px 0 0; color: var(--o-muted); font-size: 12.5px; }
 .opp .top { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-end; justify-content: space-between; }
 .opp .tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-width: 0; }
@@ -134,7 +133,7 @@
 .opp .q { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: start; font-size: 13.5px; }
 .opp .q .own { color: var(--o-muted); font-size: 12px; text-align: right; }
 .opp .q.done span.t { text-decoration: line-through; color: var(--o-muted); }
-.opp .vcard { background: var(--o-surface); border: 1px solid var(--o-line); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.opp .vcard { background: var(--o-surface); border: 1px solid var(--o-line); border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
 .opp .vcard p { margin: 0; }
 .opp .vprod { color: var(--o-muted); font-size: 12.5px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
@@ -176,3 +175,5 @@
   .opp .dash { grid-template-columns: 1fr; }
   .opp-drawer .row4, .opp-drawer .econ { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+.opp .vcard:hover, .opp .qcard:hover { border-color: #d4d3ce; }
