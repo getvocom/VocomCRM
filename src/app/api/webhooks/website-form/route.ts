@@ -75,18 +75,44 @@ export async function POST(request: NextRequest) {
     if (recent && recent.length > 0) return NextResponse.json({ ok: true, duplicate: true });
   }
 
-  const message = pick('message', 'use_case', 'comments', 'enquiry', 'inquiry', 'details');
+  // The site's forms use labels like "Use Case", "Phone Number", "Delivery Location", "I Am A",
+  // "Fiber Type", "Footage", "Needed By". The enquiry text goes in use_case; everything else a
+  // quote request carries is kept readable in notes (and the full payload stays in raw_payload).
+  const message = pick('message', 'comments', 'enquiry', 'inquiry', 'details');
+  const topic = pick('use_case', 'topic', 'interest');
+  const detail = (label: string, ...keys: string[]) => {
+    const v = pick(...keys);
+    return v ? `${label}: ${v}` : null;
+  };
+  const notes =
+    [
+      topic && message ? `Message: ${message}` : null,
+      detail('I am a', 'i_am_a', 'role_type'),
+      detail('Fiber type', 'fiber_type'),
+      detail('Fiber count', 'fiber_count'),
+      detail('Footage', 'footage'),
+      detail('Needed by', 'needed_by'),
+      detail('Delivery location', 'delivery_location'),
+      detail('Website', 'company_website'),
+      detail('Form', 'form'),
+      detail('Page', 'page'),
+      detail('Requirements file', 'requirements_file')
+    ]
+      .filter(Boolean)
+      .join('\n') || null;
+
   const { data: inserted, error } = await supabase
     .from('website_leads')
     .insert({
       name,
       email,
-      phone: pick('phone', 'telephone', 'mobile'),
+      phone: pick('phone', 'phone_number', 'telephone', 'mobile'),
       company,
       job_title: pick('job_title', 'title', 'role'),
-      location: pick('location', 'country', 'city'),
+      location: pick('location', 'delivery_location', 'country', 'city'),
       company_size: pick('company_size', 'size'),
-      use_case: message,
+      use_case: topic ?? message,
+      notes,
       source: 'Website',
       raw_payload: data
     })
