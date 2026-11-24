@@ -11,6 +11,7 @@ import {
   type ActivityEntry,
   type Deal,
   type DealContactRef,
+  type DealSource,
   type DealFile,
   type DealPriority,
   type DealQuestion,
@@ -269,7 +270,7 @@ export async function updateDeal(
     pic: string;
     product: string;
     division: string | null;
-    source: LeadSource | null;
+    source: DealSource | null;
   }>
 ) {
   const supabase = await createClient();

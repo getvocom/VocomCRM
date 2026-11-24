@@ -176,6 +176,7 @@ interface ExistingLeadRow {
   campaign: string | null;
   sequence_status: string | null;
   last_contacted_at: string | null;
+  interest_status: string | null;
 }
 
 async function syncLeads(
@@ -186,7 +187,7 @@ async function syncLeads(
   const existingRows = await fetchAllRows<ExistingLeadRow>((from, to) =>
     supabase
       .from('instantly_leads')
-      .select('email, campaign, sequence_status, last_contacted_at')
+      .select('email, campaign, sequence_status, last_contacted_at, interest_status')
       .range(from, to)
   );
   const existingByKey = new Map(existingRows.map((r) => [`${r.email}|||${r.campaign}`, r]));
@@ -205,6 +206,7 @@ async function syncLeads(
         email: string;
         sequence_status: string | null;
         last_contacted_at: string | null;
+        interest_status: string;
       }[] = [];
       let sawAnyLead = false;
 
@@ -249,7 +251,8 @@ async function syncLeads(
               email: r.email,
               campaign: r.campaign,
               sequence_status: r.sequence_status,
-              last_contacted_at: r.last_contacted_at
+              last_contacted_at: r.last_contacted_at,
+              interest_status: r.interest_status
             })
           );
           inserted += newRows.length;
@@ -263,17 +266,21 @@ async function syncLeads(
           if (!existingRow) continue; // just inserted above, already current
           const newSequenceStatus = sequenceStatusLabel(lead.status);
           const newLastContacted = lead.timestamp_last_contact ?? null;
+          const newInterest = interestStatusLabel(lead.lt_interest_status);
           if (
             existingRow.sequence_status !== newSequenceStatus ||
+            existingRow.interest_status !== newInterest ||
             !sameInstant(existingRow.last_contacted_at, newLastContacted)
           ) {
             progressUpdates.push({
               email: lead.email,
               sequence_status: newSequenceStatus,
-              last_contacted_at: newLastContacted
+              last_contacted_at: newLastContacted,
+              interest_status: newInterest
             });
             existingRow.sequence_status = newSequenceStatus;
             existingRow.last_contacted_at = newLastContacted;
+            existingRow.interest_status = newInterest;
           }
         }
 
@@ -297,7 +304,8 @@ async function syncLeads(
           email: u.email,
           campaign: campaign.name,
           sequence_status: u.sequence_status,
-          last_contacted_at: u.last_contacted_at
+          last_contacted_at: u.last_contacted_at,
+          interest_status: u.interest_status
         }));
         const { error } = await supabase
           .from('instantly_leads')

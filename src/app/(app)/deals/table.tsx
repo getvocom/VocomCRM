@@ -13,7 +13,7 @@ import { buildCsv, downloadCsv } from '@/lib/csv-export';
 import {
   DEAL_PIPELINE_STATUSES,
   DIVISIONS,
-  LEAD_SOURCES,
+  DEAL_SOURCES,
   type Account,
   type Deal,
   type DealPipelineStatus,
@@ -568,7 +568,7 @@ export function DealsTable({
                   </td>
                   <td className="px-4 py-3">
                     <StatusSelect
-                      options={['Unset', ...LEAD_SOURCES]}
+                      options={['Unset', ...DEAL_SOURCES]}
                       value={deal.source ?? 'Unset'}
                       onChange={(source) =>
                         updateDeal(deal.id, { source: source === 'Unset' ? null : (source as Deal['source']) })

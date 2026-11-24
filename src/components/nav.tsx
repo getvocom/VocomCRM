@@ -25,6 +25,7 @@ const NAV_GROUPS = [
   {
     label: 'Marketing',
     links: [
+      { href: '/marketing-results', label: 'Marketing Results' },
       { href: '/instantly-leads', label: 'Instantly Leads' },
       { href: '/linkedin-outreach', label: 'LinkedIn Outreach' },
       { href: '/linkedin-activity', label: 'LinkedIn Activity' },

@@ -1,5 +1,12 @@
 export type LeadStatus = 'New' | 'Contacted' | 'Qualified' | 'Won' | 'Lost';
 export type LeadSource = 'Website' | 'Offline Event' | 'Referral' | 'Research' | 'LinkedIn' | 'Other';
+// Where a deal originally came from. Same as LeadSource plus Instantly (cold-email campaigns),
+// which live in their own table rather than website_leads.
+export type DealSource = LeadSource | 'Instantly';
+export const DEAL_SOURCES: DealSource[] = ['Website', 'LinkedIn', 'Instantly', 'Offline Event', 'Referral', 'Research', 'Other'];
+// Channels that count as marketing in the Marketing Results page.
+export const MARKETING_SOURCES: DealSource[] = ['Website', 'LinkedIn', 'Instantly'];
+
 export type LeadPriority = 'Low' | 'Medium' | 'High';
 export type LeadPhase = 'Rep Assigned' | 'Cynthia Follow-up' | 'Escalated to Cold Call';
 export type DealStatus = 'Prospecting' | 'Connected' | 'Conversation' | 'Meeting' | 'Won' | 'Lost';
@@ -215,7 +222,7 @@ export interface Deal {
   updated_at: string;
   account_id: string | null;
   division: string | null;
-  source: LeadSource | null;
+  source: DealSource | null;
   stage_changed_at: string;
   // Opportunity-tracker fields (migration_021). `value` is the quoted price to the
   // customer (0 = not priced yet) and `cost` is what Vocom pays.
