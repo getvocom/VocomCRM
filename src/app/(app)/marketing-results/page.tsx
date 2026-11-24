@@ -41,7 +41,10 @@ function daysSince(iso: string): number {
 const money = (n: number) => `$${Math.round(n).toLocaleString()}`;
 const day = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-type LeadRow = Pick<Lead, 'id' | 'name' | 'company' | 'source' | 'status' | 'created_at' | 'deal_id'>;
+type LeadRow = Pick<Lead, 'id' | 'name' | 'company' | 'source' | 'status' | 'created_at' | 'deal_id' | 'use_case'>;
+
+// The website sends newsletter sign-ups to the CRM too; they are not sales enquiries.
+const isNewsletter = (l: { use_case: string | null }) => l.use_case === 'Newsletter sign-up';
 
 export default async function MarketingResultsPage({
   searchParams
@@ -59,7 +62,7 @@ export default async function MarketingResultsPage({
 
   let leadsQuery = supabase
     .from('website_leads')
-    .select('id, name, company, source, status, created_at, deal_id')
+    .select('id, name, company, source, status, created_at, deal_id, use_case')
     .order('created_at', { ascending: false });
   if (cutoffIso) leadsQuery = leadsQuery.gte('created_at', cutoffIso);
 
@@ -90,11 +93,14 @@ export default async function MarketingResultsPage({
   const channelOf = (d: Deal): DealSource | 'Unattributed' =>
     (d.source ?? (linkedSource.get(d.id) as DealSource | undefined) ?? 'Unattributed') as DealSource | 'Unattributed';
 
+  const newsletterCount = (leads ?? []).filter(isNewsletter).length;
+  const enquiries = (leads ?? []).filter((l) => !isNewsletter(l));
+
   const periodDeals = (deals ?? []).filter((d) => !cutoffDate || d.start_date >= cutoffDate);
   const counted = (d: Deal) => stageOf(d) !== 'Lost';
 
   const rows = CHANNELS.map((channel) => {
-    const chLeads = (leads ?? []).filter((l) => l.source === channel);
+    const chLeads = enquiries.filter((l) => l.source === channel);
     const chReplies = channel === 'Instantly' ? replies ?? [] : [];
     const chDeals = periodDeals.filter((d) => channelOf(d) === channel);
     const live = chDeals.filter(counted);
@@ -120,7 +126,7 @@ export default async function MarketingResultsPage({
   const formQuiet = formDays === null || formDays >= STALE_FORM_DAYS;
 
   const leadFeed = [
-    ...(leads ?? [])
+    ...enquiries
       .filter((l) => MARKETING_SOURCES.includes(l.source as DealSource))
       .map((l) => ({ key: `w-${l.id}`, when: l.created_at, channel: l.source as string, who: l.name, company: l.company, status: l.status as string })),
     ...(replies ?? []).map((r) => ({
@@ -169,7 +175,7 @@ export default async function MarketingResultsPage({
         </div>
       )}
 
-      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="mb-2 grid grid-cols-2 gap-4 md:grid-cols-4">
         <Tile label={`Marketing leads (${rangeLabel})`} value={String(sum('leads'))} sub={`${sum('engaged')} engaged or qualified`} />
         <Tile label="Marketing deals" value={String(sum('deals'))} sub={`${sum('unpriced')} not yet priced`} />
         <Tile
@@ -185,6 +191,10 @@ export default async function MarketingResultsPage({
           warn={formQuiet}
         />
       </div>
+
+      <p className="mb-6 text-xs text-neutral-400">
+        {newsletterCount} newsletter sign-up{newsletterCount === 1 ? '' : 's'} in this period, counted separately and not included as leads.
+      </p>
 
       <h2 className="mb-2 text-sm font-semibold text-neutral-700">By channel ({rangeLabel})</h2>
       <div className="mb-8 overflow-x-auto rounded-xl border border-neutral-200 bg-white shadow-sm">

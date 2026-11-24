@@ -79,7 +79,9 @@ export async function POST(request: NextRequest) {
   // "Fiber Type", "Footage", "Needed By". The enquiry text goes in use_case; everything else a
   // quote request carries is kept readable in notes (and the full payload stays in raw_payload).
   const message = pick('message', 'comments', 'enquiry', 'inquiry', 'details');
-  const topic = pick('use_case', 'topic', 'interest');
+  const leadType = pick('lead_type', 'form');
+  const isNewsletter = !!leadType && /newsletter/i.test(leadType);
+  const topic = isNewsletter ? 'Newsletter sign-up' : pick('use_case', 'topic', 'interest');
   const detail = (label: string, ...keys: string[]) => {
     const v = pick(...keys);
     return v ? `${label}: ${v}` : null;
@@ -94,8 +96,11 @@ export async function POST(request: NextRequest) {
       detail('Needed by', 'needed_by'),
       detail('Delivery location', 'delivery_location'),
       detail('Website', 'company_website'),
-      detail('Form', 'form'),
+      detail('Form', 'form', 'lead_type'),
       detail('Page', 'page'),
+      detail('Lead ID (site sheet)', 'lead_id'),
+      detail('Free email address', 'free_email'),
+      detail('Spam check unavailable', 'unverified'),
       detail('Requirements file', 'requirements_file')
     ]
       .filter(Boolean)
