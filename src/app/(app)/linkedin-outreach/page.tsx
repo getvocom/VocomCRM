@@ -1,17 +1,11 @@
 import { BarTrend } from '@/components/bar-trend';
+import { PageHeaderPanels } from '@/components/page-header-panels';
+import { chartClass } from '@/lib/pill-colors';
 import { BreakdownBars } from '@/components/breakdown-bars';
 import { createClient } from '@/lib/supabase/server';
 import { LEAD_STATUSES, type Deal, type Lead, type Rep } from '@/lib/types';
 import { LeadsTable } from '../leads/table';
 import { LinkedInUploadForm } from './upload-form';
-
-const STATUS_COLORS: Record<string, string> = {
-  New: 'bg-neutral-500',
-  Contacted: 'bg-blue-500',
-  Qualified: 'bg-amber-500',
-  Won: 'bg-green-500',
-  Lost: 'bg-red-400'
-};
 
 export default async function LinkedInOutreachPage() {
   const supabase = await createClient();
@@ -32,22 +26,26 @@ export default async function LinkedInOutreachPage() {
   const statusBreakdown = LEAD_STATUSES.map((status) => ({
     label: status,
     count: allLeads.filter((l) => l.status === status).length,
-    colorClass: STATUS_COLORS[status]
+    colorClass: chartClass(status)
   }));
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold text-neutral-900">LinkedIn Outreach</h1>
-      <p className="mb-6 text-sm text-neutral-500">
-        Leads sourced from LinkedIn outreach, managed by Cynthia. They also appear on Leads
-        under the LinkedIn tab — the same rows, so an edit here shows there too. Changing a
-        lead&apos;s source away from LinkedIn moves it off this page.
-      </p>
+      <PageHeaderPanels
+        group="Marketing"
+        title="LinkedIn Outreach"
+        panels={[{ key: 'upload', label: 'Import CSV', content: <LinkedInUploadForm /> }]}
+        description={
+          <>
+            Leads sourced from LinkedIn outreach, managed by Cynthia. They also appear on Leads
+            under the LinkedIn tab — the same rows, so an edit here shows there too. Changing a
+            lead&apos;s source away from LinkedIn moves it off this page.
+          </>
+        }
+      />
 
-      <LinkedInUploadForm />
-
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <BarTrend title="New leads" data={dailyPoints} colorClass="bg-blue-500" />
+      <div className="mb-6 mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <BarTrend title="New leads" data={dailyPoints} colorClass="bg-accent" />
         <BreakdownBars title="By status" items={statusBreakdown} />
       </div>
 
