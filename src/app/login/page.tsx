@@ -34,43 +34,57 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-neutral-50 px-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-xl border border-neutral-200 bg-white p-8 shadow-sm"
-      >
-        <h1 className="mb-1 text-xl font-bold tracking-wide text-vocom">VOCOM CRM</h1>
-        <p className="mb-6 text-sm text-neutral-500">Sign in to continue</p>
+    <div className="flex flex-1 items-center justify-center bg-page px-4">
+      <form onSubmit={handleSubmit} className="card w-full max-w-sm p-8">
+        <div className="mb-6 flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-ink text-sm font-semibold text-white">
+            V
+          </span>
+          <div className="leading-tight">
+            <div className="text-sm font-semibold text-ink">Vocom CRM</div>
+            <div className="text-xs text-ink-2">Sales workspace</div>
+          </div>
+        </div>
+        <h1 className="mb-1 text-xl font-semibold tracking-[-0.01em] text-ink">Sign in</h1>
+        <p className="mb-6 text-sm text-ink-2">Use the email and password your admin set up.</p>
 
-        <label className="mb-1 block text-sm font-medium text-neutral-700">Email</label>
+        <label htmlFor="login-email" className="mb-1 block text-[13px] font-medium text-ink-3">
+          Email
+        </label>
         <input
+          id="login-email"
           type="email"
+          autoComplete="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mb-4 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-neutral-500 focus:outline-none"
+          className="field mb-4 w-full"
         />
 
-        <label className="mb-1 block text-sm font-medium text-neutral-700">Password</label>
+        <label htmlFor="login-password" className="mb-1 block text-[13px] font-medium text-ink-3">
+          Password
+        </label>
         <input
+          id="login-password"
           type="password"
+          autoComplete="current-password"
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-neutral-500 focus:outline-none"
+          className="field mb-4 w-full"
         />
 
-        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="mb-4 text-sm text-warn">
+            {error}
+          </p>
+        )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-vocom px-3 py-2 text-sm font-medium text-white hover:bg-vocom-dark disabled:opacity-50"
-        >
+        <button type="submit" disabled={loading} className="btn btn-primary w-full justify-center disabled:opacity-50">
           {loading ? 'Signing in...' : 'Sign in'}
         </button>
 
-        <p className="mt-4 text-xs text-neutral-400">
+        <p className="mt-4 text-xs text-ink-2">
           Accounts are created by an admin in Supabase — there&apos;s no self-signup.
         </p>
       </form>
