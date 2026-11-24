@@ -8,15 +8,17 @@ export function PageHeader({
   group,
   title,
   description,
-  actions
+  actions,
+  className = ''
 }: {
   group?: string;
   title: string;
   description?: React.ReactNode;
   actions?: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4">
+    <div className={`flex flex-wrap items-end justify-between gap-4 ${className}`}>
       <div className="min-w-0">
         {group && <div className="mb-1 text-[13px] text-ink-2">{group}</div>}
         <h1 className="text-[32px] font-semibold leading-tight tracking-[-0.02em] text-ink">{title}</h1>

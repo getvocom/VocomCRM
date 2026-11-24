@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { PageHeader } from '@/components/ui';
 import { formatCompact } from '@/lib/format';
 import { stageOf } from '@/lib/opportunities';
 import { createClient } from '@/lib/supabase/server';
@@ -145,11 +146,17 @@ export default async function MarketingResultsPage({
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold text-neutral-900">Marketing Results</h1>
-      <p className="mb-4 text-sm text-neutral-500">
-        Leads and deals that came from marketing (website form, LinkedIn outreach, Instantly cold email) and what they
-        are worth. Deal value is the quoted price; deals with no price yet are counted but shown as not yet priced.
-      </p>
+      <PageHeader
+        group="Marketing"
+        title="Marketing Results"
+        className="mb-4"
+        description={
+          <>
+            Leads and deals that came from marketing (website form, LinkedIn outreach, Instantly cold email) and what they
+            are worth. Deal value is the quoted price; deals with no price yet are counted but shown as not yet priced.
+          </>
+        }
+      />
 
       <div className="mb-4 flex flex-wrap gap-2">
         {RANGES.map((r) => (
@@ -157,7 +164,7 @@ export default async function MarketingResultsPage({
             key={r.days}
             href={`/marketing-results?days=${r.days}`}
             className={`rounded-full border px-3 py-1 text-sm ${
-              r.days === days ? 'border-vocom bg-vocom text-white' : 'border-neutral-300 bg-white text-neutral-600 hover:border-neutral-400'
+              r.days === days ? 'border-ink bg-ink text-white' : 'border-line bg-panel text-ink-3 hover:border-ink-2'
             }`}
           >
             {r.label}
@@ -166,7 +173,7 @@ export default async function MarketingResultsPage({
       </div>
 
       {formQuiet && (
-        <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+        <div className="mb-4 rounded-xl border border-pill-amber bg-pill-amber p-3 text-sm text-pill-amber-ink">
           {formDays === null
             ? 'No website form submission has ever reached the CRM.'
             : `The last website form submission reached the CRM ${formDays} days ago (${day(lastForm![0].created_at as string)}).`}{' '}
@@ -192,86 +199,86 @@ export default async function MarketingResultsPage({
         />
       </div>
 
-      <p className="mb-6 text-xs text-neutral-400">
+      <p className="mb-6 text-xs text-ink-2">
         {newsletterCount} newsletter sign-up{newsletterCount === 1 ? '' : 's'} in this period, counted separately and not included as leads.
       </p>
 
-      <h2 className="mb-2 text-sm font-semibold text-neutral-700">By channel ({rangeLabel})</h2>
-      <div className="mb-8 overflow-x-auto rounded-xl border border-neutral-200 bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+      <h2 className="mb-2 text-sm font-semibold text-ink-3">By channel ({rangeLabel})</h2>
+      <div className="mb-8 table-shell">
+        <table>
+          <thead>
             <tr>
-              <th className="px-4 py-3 font-medium">Channel</th>
-              <th className="px-4 py-3 font-medium">Leads</th>
-              <th className="px-4 py-3 font-medium">Engaged</th>
-              <th className="px-4 py-3 font-medium">Deals</th>
+              <th>Channel</th>
+              <th>Leads</th>
+              <th>Engaged</th>
+              <th>Deals</th>
               <th className="px-4 py-3 text-right font-medium">Quoted value</th>
-              <th className="px-4 py-3 font-medium">Priced</th>
+              <th>Priced</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100">
+          <tbody>
             {rows.map((r) => {
               const isMarketing = MARKETING_SOURCES.includes(r.channel as DealSource);
               return (
-                <tr key={r.channel} className={isMarketing ? '' : 'text-neutral-500'}>
-                  <td className="px-4 py-3 font-medium text-neutral-900">
+                <tr key={r.channel} className={isMarketing ? '' : 'text-ink-2'}>
+                  <td className="font-medium text-ink">
                     {r.channel}
-                    {!isMarketing && <span className="ml-2 text-xs font-normal text-neutral-400">not marketing</span>}
+                    {!isMarketing && <span className="ml-2 text-xs font-normal text-ink-2">not marketing</span>}
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     {r.leads}
-                    {r.channel === 'Instantly' && <span className="ml-1 text-xs text-neutral-400">replies</span>}
+                    {r.channel === 'Instantly' && <span className="ml-1 text-xs text-ink-2">replies</span>}
                   </td>
-                  <td className="px-4 py-3">{r.engaged}</td>
-                  <td className="px-4 py-3">{r.deals}</td>
-                  <td className="px-4 py-3 text-right font-mono">{r.value ? money(r.value) : '—'}</td>
-                  <td className="px-4 py-3 text-xs">
+                  <td>{r.engaged}</td>
+                  <td>{r.deals}</td>
+                  <td className="text-right font-mono">{r.value ? money(r.value) : '—'}</td>
+                  <td className="text-xs">
                     {r.priced} priced{r.unpriced ? `, ${r.unpriced} not yet` : ''}
                   </td>
                 </tr>
               );
             })}
-            <tr className="bg-neutral-50 font-semibold text-neutral-900">
-              <td className="px-4 py-3">Marketing total</td>
-              <td className="px-4 py-3">{sum('leads')}</td>
-              <td className="px-4 py-3">{sum('engaged')}</td>
-              <td className="px-4 py-3">{sum('deals')}</td>
-              <td className="px-4 py-3 text-right font-mono">{sum('value') ? money(sum('value')) : '—'}</td>
+            <tr className="bg-panel-2 font-semibold text-ink">
+              <td>Marketing total</td>
+              <td>{sum('leads')}</td>
+              <td>{sum('engaged')}</td>
+              <td>{sum('deals')}</td>
+              <td className="text-right font-mono">{sum('value') ? money(sum('value')) : '—'}</td>
               <td className="px-4 py-3" />
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h2 className="mb-2 text-sm font-semibold text-neutral-700">Deals from marketing ({rangeLabel})</h2>
+      <h2 className="mb-2 text-sm font-semibold text-ink-3">Deals from marketing ({rangeLabel})</h2>
       {marketingDeals.length === 0 ? (
-        <p className="mb-8 text-sm text-neutral-500">No marketing deals in this period.</p>
+        <p className="mb-8 text-sm text-ink-2">No marketing deals in this period.</p>
       ) : (
-        <div className="mb-8 overflow-x-auto rounded-xl border border-neutral-200 bg-white shadow-sm">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+        <div className="mb-8 table-shell">
+          <table>
+            <thead>
               <tr>
-                <th className="px-4 py-3 font-medium">Deal</th>
-                <th className="px-4 py-3 font-medium">Channel</th>
-                <th className="px-4 py-3 font-medium">Stage</th>
-                <th className="px-4 py-3 font-medium">Started</th>
+                <th>Deal</th>
+                <th>Channel</th>
+                <th>Stage</th>
+                <th>Started</th>
                 <th className="px-4 py-3 text-right font-medium">Quoted value</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody>
               {marketingDeals.map((d) => (
                 <tr key={d.id}>
-                  <td className="px-4 py-3 text-neutral-900">
+                  <td className="text-ink">
                     <Link href={`/deals`} className="font-medium hover:underline">
                       {d.title || d.product || d.customer_name}
                     </Link>
-                    <span className="block text-xs text-neutral-400">{d.company ?? d.customer_name}</span>
+                    <span className="block text-xs text-ink-2">{d.company ?? d.customer_name}</span>
                   </td>
-                  <td className="px-4 py-3">{channelOf(d)}</td>
-                  <td className="px-4 py-3">{stageOf(d)}</td>
-                  <td className="px-4 py-3 text-neutral-500">{day(d.start_date)}</td>
-                  <td className="px-4 py-3 text-right font-mono">
-                    {d.value > 0 ? money(d.value) : <span className="font-sans text-neutral-400">not yet priced</span>}
+                  <td>{channelOf(d)}</td>
+                  <td>{stageOf(d)}</td>
+                  <td className="text-ink-2">{day(d.start_date)}</td>
+                  <td className="text-right font-mono">
+                    {d.value > 0 ? money(d.value) : <span className="font-sans text-ink-2">not yet priced</span>}
                   </td>
                 </tr>
               ))}
@@ -280,29 +287,29 @@ export default async function MarketingResultsPage({
         </div>
       )}
 
-      <h2 className="mb-2 text-sm font-semibold text-neutral-700">Marketing leads ({rangeLabel})</h2>
+      <h2 className="mb-2 text-sm font-semibold text-ink-3">Marketing leads ({rangeLabel})</h2>
       {leadFeed.length === 0 ? (
-        <p className="text-sm text-neutral-500">No marketing leads in this period.</p>
+        <p className="text-sm text-ink-2">No marketing leads in this period.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white shadow-sm">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+        <div className="table-shell">
+          <table>
+            <thead>
               <tr>
-                <th className="px-4 py-3 font-medium">When</th>
-                <th className="px-4 py-3 font-medium">Channel</th>
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Company</th>
-                <th className="px-4 py-3 font-medium">Status</th>
+                <th>When</th>
+                <th>Channel</th>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody>
               {leadFeed.map((l) => (
                 <tr key={l.key}>
-                  <td className="px-4 py-3 text-neutral-500">{day(l.when)}</td>
-                  <td className="px-4 py-3">{l.channel}</td>
-                  <td className="px-4 py-3 text-neutral-900">{l.who ?? '—'}</td>
-                  <td className="px-4 py-3">{l.company ?? '—'}</td>
-                  <td className="px-4 py-3">{l.status}</td>
+                  <td className="text-ink-2">{day(l.when)}</td>
+                  <td>{l.channel}</td>
+                  <td className="text-ink">{l.who ?? '—'}</td>
+                  <td>{l.company ?? '—'}</td>
+                  <td>{l.status}</td>
                 </tr>
               ))}
             </tbody>
@@ -315,15 +322,15 @@ export default async function MarketingResultsPage({
 
 function Tile({ label, value, sub, title, warn }: { label: string; value: string; sub?: string; title?: string; warn?: boolean }) {
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-      <p className="text-sm text-neutral-500">{label}</p>
+    <div className="card p-5">
+      <p className="text-sm text-ink-2">{label}</p>
       <p
-        className={`mt-1 truncate text-2xl font-semibold sm:text-3xl ${warn ? 'text-amber-600' : 'text-neutral-900'}`}
+        className={`mt-1 truncate text-2xl font-semibold sm:text-3xl ${warn ? 'text-pill-amber-ink' : 'text-ink'}`}
         title={title ?? value}
       >
         {value}
       </p>
-      {sub && <p className={`mt-0.5 text-xs ${warn ? 'text-amber-600' : 'text-neutral-400'}`}>{sub}</p>}
+      {sub && <p className={`mt-0.5 text-xs ${warn ? 'text-pill-amber-ink' : 'text-ink-2'}`}>{sub}</p>}
     </div>
   );
 }
