@@ -2,17 +2,11 @@ import { AddLeadForm } from '@/components/add-lead-form';
 import { BarTrend } from '@/components/bar-trend';
 import { BreakdownBars } from '@/components/breakdown-bars';
 import { LeadsUploadForm } from '@/components/leads-upload-form';
+import { PageHeaderPanels } from '@/components/page-header-panels';
+import { chartClass } from '@/lib/pill-colors';
 import { createClient } from '@/lib/supabase/server';
 import { LEAD_STATUSES, type Deal, type Lead, type Rep } from '@/lib/types';
 import { LeadsTable } from '../leads/table';
-
-const STATUS_COLORS: Record<string, string> = {
-  New: 'bg-neutral-500',
-  Contacted: 'bg-blue-500',
-  Qualified: 'bg-amber-500',
-  Won: 'bg-green-500',
-  Lost: 'bg-red-400'
-};
 
 export default async function ResearchPage() {
   const supabase = await createClient();
@@ -33,23 +27,29 @@ export default async function ResearchPage() {
   const statusBreakdown = LEAD_STATUSES.map((status) => ({
     label: status,
     count: allLeads.filter((l) => l.status === status).length,
-    colorClass: STATUS_COLORS[status]
+    colorClass: chartClass(status)
   }));
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold text-neutral-900">Research</h1>
-      <p className="mb-6 text-sm text-neutral-500">
-        Leads worth a manual cold outreach pass when there&apos;s time — not actively
-        worked yet. Changing a lead&apos;s source away from Research moves it off this
-        page.
-      </p>
+      <PageHeaderPanels
+        group="Sales"
+        title="Research"
+        description={
+          <>
+            Leads worth a manual cold outreach pass when there&apos;s time — not actively
+            worked yet. Changing a lead&apos;s source away from Research moves it off this
+            page.
+          </>
+        }
+        panels={[
+          { key: 'upload', label: 'Import CSV', content: <LeadsUploadForm source="Research" /> },
+          { key: 'add', label: '+ Add lead', content: <AddLeadForm source="Research" /> }
+        ]}
+      />
 
-      <AddLeadForm source="Research" />
-      <LeadsUploadForm source="Research" />
-
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <BarTrend title="New leads" data={dailyPoints} colorClass="bg-blue-500" />
+      <div className="mb-6 mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <BarTrend title="New leads" data={dailyPoints} colorClass="bg-accent" />
         <BreakdownBars title="By status" items={statusBreakdown} />
       </div>
 
