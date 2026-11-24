@@ -1,12 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from '@/app/actions';
 import { GlobalSearch } from '@/components/global-search';
 import { NAV_GROUPS } from '@/lib/nav-items';
 import { NotificationBell } from '@/components/notification-bell';
+
+// Desktop sidebar vs mobile top bar. The notification bell polls the server, so only the
+// visible copy is mounted (one poller per tab, not two).
+const DESKTOP_QUERY = '(min-width: 768px)';
+function subscribeToViewport(onChange: () => void) {
+  const mq = window.matchMedia(DESKTOP_QUERY);
+  mq.addEventListener('change', onChange);
+  return () => mq.removeEventListener('change', onChange);
+}
+function useIsDesktop() {
+  return useSyncExternalStore(
+    subscribeToViewport,
+    () => window.matchMedia(DESKTOP_QUERY).matches,
+    () => true
+  );
+}
 
 function Brand() {
   return (
@@ -58,6 +74,7 @@ export function Nav() {
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const isDesktop = useIsDesktop();
 
   async function handleSignOut() {
     await signOut();
@@ -80,7 +97,7 @@ export function Nav() {
       <header className="flex items-center justify-between gap-2 border-b border-line bg-page px-4 py-3 md:hidden">
         <Brand />
         <div className="flex items-center gap-1">
-          <NotificationBell />
+          {!isDesktop && <NotificationBell />}
           <button
             onClick={() => setMenuOpen((open) => !open)}
             aria-label="Toggle menu"
@@ -112,7 +129,7 @@ export function Nav() {
       <aside className="hidden md:sticky md:top-0 md:flex md:h-screen md:w-[248px] md:shrink-0 md:flex-col md:border-r md:border-line md:bg-page">
         <div className="flex items-center justify-between gap-2 px-[22px] pb-3.5 pt-6">
           <Brand />
-          <NotificationBell align="left" />
+          {isDesktop && <NotificationBell align="left" />}
         </div>
         <div className="px-3">
           <GlobalSearch shortcut />
