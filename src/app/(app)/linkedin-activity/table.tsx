@@ -22,7 +22,7 @@ function Toggle({
       checked={checked}
       disabled={isPending}
       onChange={(e) => startTransition(() => onChange(e.target.checked))}
-      className="h-4 w-4 rounded border-neutral-300"
+      className="h-4 w-4 rounded border-line"
     />
   );
 }
@@ -39,32 +39,32 @@ export function LinkedInActivityTable({
   const { rowProps } = useHighlightRow();
 
   if (activity.length === 0) {
-    return <p className="text-sm text-neutral-500">Nothing logged yet — use the form above.</p>;
+    return <p className="text-sm text-ink-2">Nothing logged yet — use the form above.</p>;
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white shadow-sm">
-      <table className="w-full text-left text-sm">
-        <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+    <div className="table-shell">
+      <table>
+        <thead>
           <tr>
-            <th className="px-4 py-3 font-medium">Date</th>
-            <th className="px-4 py-3 font-medium">Prospect</th>
-            <th className="px-4 py-3 font-medium">Company</th>
-            <th className="px-4 py-3 font-medium">Activity</th>
-            <th className="px-4 py-3 font-medium">Sent</th>
-            <th className="px-4 py-3 font-medium">Accepted</th>
-            <th className="px-4 py-3 font-medium">Assigned Rep</th>
-            <th className="px-4 py-3 font-medium">Deal Status</th>
-            <th className="px-4 py-3 font-medium"></th>
+            <th>Date</th>
+            <th>Prospect</th>
+            <th>Company</th>
+            <th>Activity</th>
+            <th>Sent</th>
+            <th>Accepted</th>
+            <th>Assigned Rep</th>
+            <th>Deal Status</th>
+            <th></th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-100">
+        <tbody>
           {activity.map((row) => (
             <tr key={row.id} {...rowProps(row.id)}>
-              <td className="whitespace-nowrap px-4 py-3 text-neutral-500">
+              <td className="whitespace-nowrap px-4 py-3 text-ink-2">
                 {new Date(row.date_logged).toLocaleDateString()}
               </td>
-              <td className="px-4 py-3 text-neutral-900">
+              <td className="text-ink">
                 {row.linkedin_url ? (
                   <a href={row.linkedin_url} target="_blank" rel="noreferrer" className="hover:underline">
                     {row.prospect}
@@ -73,15 +73,15 @@ export function LinkedInActivityTable({
                   row.prospect
                 )}
               </td>
-              <td className="px-4 py-3 text-neutral-600">{row.company || '—'}</td>
-              <td className="px-4 py-3 text-neutral-600">{row.activity || '—'}</td>
-              <td className="px-4 py-3">
+              <td className="text-ink-3">{row.company || '—'}</td>
+              <td className="text-ink-3">{row.activity || '—'}</td>
+              <td>
                 <Toggle
                   checked={row.connection_sent}
                   onChange={(checked) => updateLinkedInActivity(row.id, { connection_sent: checked })}
                 />
               </td>
-              <td className="px-4 py-3">
+              <td>
                 <Toggle
                   checked={row.connection_accepted}
                   onChange={(checked) =>
@@ -89,14 +89,14 @@ export function LinkedInActivityTable({
                   }
                 />
               </td>
-              <td className="px-4 py-3">
+              <td>
                 <RepSelect
                   reps={reps}
                   value={row.assigned_rep_id}
                   onChange={(repId) => updateLinkedInActivity(row.id, { assigned_rep_id: repId })}
                 />
               </td>
-              <td className="px-4 py-3">
+              <td>
                 <StatusSelect
                   options={dealStatuses}
                   value={row.deal_status}
@@ -107,7 +107,7 @@ export function LinkedInActivityTable({
                   }
                 />
               </td>
-              <td className="px-4 py-3">
+              <td>
                 <DeleteButton onDelete={() => deleteLinkedInActivity(row.id)} />
               </td>
             </tr>
