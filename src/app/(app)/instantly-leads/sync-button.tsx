@@ -22,15 +22,16 @@ export function SyncNowButton() {
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-row-reverse flex-wrap items-center gap-3">
       <button
         onClick={handleClick}
         disabled={isPending}
-        className="rounded-md bg-vocom px-3 py-1.5 text-sm font-medium text-white hover:bg-vocom-dark disabled:opacity-50"
+        type="button"
+        className="btn btn-primary"
       >
         {isPending ? 'Syncing… (can take up to a few minutes)' : 'Sync Now'}
       </button>
-      {result && <span className="text-sm text-neutral-500">{result}</span>}
+      {result && <span role="status" className="text-sm text-ink-2">{result}</span>}
     </div>
   );
 }

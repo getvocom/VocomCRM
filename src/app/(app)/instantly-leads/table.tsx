@@ -11,27 +11,27 @@ import type { InstantlyLead, Rep } from '@/lib/types';
 import { CAMPAIGN_STATUS_FILTERS, INTEREST_FILTERS, SEQUENCE_STATUS_FILTERS } from './constants';
 
 const INTEREST_COLORS: Record<string, string> = {
-  Interested: 'bg-green-100 text-green-700',
-  'Meeting Booked': 'bg-purple-100 text-purple-700',
-  'Meeting Completed': 'bg-purple-100 text-purple-700',
-  Won: 'bg-green-100 text-green-700',
-  'Out of Office': 'bg-amber-100 text-amber-700',
-  'Not Interested': 'bg-red-100 text-red-700',
-  'Wrong Person': 'bg-red-100 text-red-700',
-  Lost: 'bg-red-100 text-red-700',
-  'No Show': 'bg-red-100 text-red-700',
-  'No Reply Yet': 'bg-neutral-100 text-neutral-500'
+  Interested: 'bg-pill-green text-pill-green-ink',
+  'Meeting Booked': 'bg-pill-purple text-pill-purple-ink',
+  'Meeting Completed': 'bg-pill-purple text-pill-purple-ink',
+  Won: 'bg-pill-green text-pill-green-ink',
+  'Out of Office': 'bg-pill-amber text-pill-amber-ink',
+  'Not Interested': 'bg-pill-red text-pill-red-ink',
+  'Wrong Person': 'bg-pill-red text-pill-red-ink',
+  Lost: 'bg-pill-red text-pill-red-ink',
+  'No Show': 'bg-pill-red text-pill-red-ink',
+  'No Reply Yet': 'bg-divider text-ink-2'
 };
 
 const CAMPAIGN_STATUS_COLORS: Record<string, string> = {
-  Active: 'bg-green-100 text-green-700',
-  Paused: 'bg-amber-100 text-amber-700',
-  Completed: 'bg-neutral-100 text-neutral-500',
-  'Running Subsequences': 'bg-blue-100 text-blue-700',
-  Draft: 'bg-neutral-100 text-neutral-400',
-  'Accounts Unhealthy': 'bg-red-100 text-red-700',
-  'Bounce Protect': 'bg-red-100 text-red-700',
-  'Account Suspended': 'bg-red-100 text-red-700'
+  Active: 'bg-pill-green text-pill-green-ink',
+  Paused: 'bg-pill-amber text-pill-amber-ink',
+  Completed: 'bg-divider text-ink-2',
+  'Running Subsequences': 'bg-pill-blue text-pill-blue-ink',
+  Draft: 'bg-divider text-ink-2',
+  'Accounts Unhealthy': 'bg-pill-red text-pill-red-ink',
+  'Bounce Protect': 'bg-pill-red text-pill-red-ink',
+  'Account Suspended': 'bg-pill-red text-pill-red-ink'
 };
 
 // Combines sequence_status with whether the lead has been emailed yet into one label —
@@ -40,18 +40,18 @@ const CAMPAIGN_STATUS_COLORS: Record<string, string> = {
 function sequenceStage(lead: InstantlyLead): { label: string; colorClass: string } {
   switch (lead.sequence_status) {
     case 'Bounced':
-      return { label: 'Bounced', colorClass: 'bg-red-100 text-red-700' };
+      return { label: 'Bounced', colorClass: 'bg-pill-red text-pill-red-ink' };
     case 'Unsubscribed':
-      return { label: 'Unsubscribed', colorClass: 'bg-red-100 text-red-700' };
+      return { label: 'Unsubscribed', colorClass: 'bg-pill-red text-pill-red-ink' };
     case 'Skipped':
-      return { label: 'Skipped', colorClass: 'bg-neutral-100 text-neutral-400' };
+      return { label: 'Skipped', colorClass: 'bg-divider text-ink-2' };
     case 'Paused':
-      return { label: 'Paused', colorClass: 'bg-amber-100 text-amber-700' };
+      return { label: 'Paused', colorClass: 'bg-pill-amber text-pill-amber-ink' };
     case 'Completed':
-      return { label: 'Sequence complete', colorClass: 'bg-neutral-100 text-neutral-500' };
+      return { label: 'Sequence complete', colorClass: 'bg-divider text-ink-2' };
     default:
-      if (!lead.last_contacted_at) return { label: 'Not started', colorClass: 'bg-neutral-100 text-neutral-400' };
-      return { label: 'In progress', colorClass: 'bg-blue-100 text-blue-700' };
+      if (!lead.last_contacted_at) return { label: 'Not started', colorClass: 'bg-divider text-ink-2' };
+      return { label: 'In progress', colorClass: 'bg-pill-blue text-pill-blue-ink' };
   }
 }
 
@@ -62,32 +62,32 @@ function ReplyModal({ lead, onClose }: { lead: InstantlyLead; onClose: () => voi
       onClick={onClose}
     >
       <div
-        className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl"
+        className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-xl bg-panel p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-start justify-between">
           <div>
-            <h3 className="text-base font-semibold text-neutral-900">{lead.name || lead.email}</h3>
-            <p className="text-xs text-neutral-500">
+            <h3 className="text-base font-semibold text-ink">{lead.name || lead.email}</h3>
+            <p className="text-xs text-ink-2">
               {lead.company} · {lead.campaign}
               {lead.last_reply_at ? ` · ${new Date(lead.last_reply_at).toLocaleString()}` : ''}
             </p>
           </div>
-          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-700">
+          <button onClick={onClose} className="text-ink-2 hover:text-ink-3">
             ✕
           </button>
         </div>
         {lead.reply_phone && (
-          <p className="mb-3 rounded-md bg-red-100 px-2 py-1 text-sm font-medium text-red-700">
+          <p className="mb-3 rounded-md bg-pill-red px-2 py-1 text-sm font-medium text-pill-red-ink">
             📞 {lead.reply_phone} — extracted from the reply below, double check it&apos;s correct
           </p>
         )}
         {lead.alternative_email && (
-          <p className="mb-3 rounded-md bg-amber-100 px-2 py-1 text-sm font-medium text-amber-700">
+          <p className="mb-3 rounded-md bg-pill-amber px-2 py-1 text-sm font-medium text-pill-amber-ink">
             ✉️ {lead.alternative_email} — other contact email(s) mentioned in the reply
           </p>
         )}
-        <p className="whitespace-pre-wrap text-sm text-neutral-700">{lead.reply_text}</p>
+        <p className="whitespace-pre-wrap text-sm text-ink-3">{lead.reply_text}</p>
       </div>
     </div>
   );
@@ -203,36 +203,36 @@ export function InstantlyLeadsTable({
   return (
     <div>
       {highlightId && (
-        <div className="mb-4 flex items-center justify-between rounded-lg border border-vocom/30 bg-vocom/5 px-4 py-2 text-sm text-neutral-700">
+        <div className="mb-4 flex items-center justify-between rounded-lg border border-line bg-pill-blue px-4 py-2 text-sm text-ink-3">
           <span>Showing 1 lead from a notification.</span>
-          <Link href={pathname} className="font-medium text-vocom hover:underline">
+          <Link href={pathname} className="font-medium text-accent hover:underline">
             View all leads
           </Link>
         </div>
       )}
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
         {tiles.map((tile) => (
-          <div key={tile.label} className="rounded-lg border border-neutral-200 bg-white p-3 shadow-sm">
-            <p className="text-xs text-neutral-500">
+          <div key={tile.label} className="rounded-lg border border-line bg-panel p-3">
+            <p className="text-xs text-ink-2">
               {tile.label}
               {tile.hint && (
-                <span className="ml-1 cursor-help text-neutral-400" title={tile.hint}>
+                <span className="ml-1 cursor-help text-ink-2" title={tile.hint}>
                   ⓘ
                 </span>
               )}
             </p>
-            <p className="mt-1 text-xl font-semibold text-neutral-900">{tile.count}</p>
+            <p className="mt-1 text-xl font-semibold text-ink">{tile.count}</p>
           </div>
         ))}
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-1.5 text-xs text-neutral-500">
+        <label className="flex items-center gap-1.5 text-xs text-ink-2">
           Campaign
           <select
             value={campaignStatus}
             onChange={(e) => navigateWith('campaignStatus', e.target.value)}
-            className="rounded-md border border-neutral-200 px-2 py-1 text-xs text-neutral-700"
+            className="rounded-md border border-line px-2 py-1 text-xs text-ink-3"
           >
             {CAMPAIGN_STATUS_FILTERS.map((f) => (
               <option key={f} value={f}>
@@ -241,12 +241,12 @@ export function InstantlyLeadsTable({
             ))}
           </select>
         </label>
-        <label className="flex items-center gap-1.5 text-xs text-neutral-500">
+        <label className="flex items-center gap-1.5 text-xs text-ink-2">
           Sequence
           <select
             value={sequenceStatus}
             onChange={(e) => navigateWith('sequenceStatus', e.target.value)}
-            className="rounded-md border border-neutral-200 px-2 py-1 text-xs text-neutral-700"
+            className="rounded-md border border-line px-2 py-1 text-xs text-ink-3"
           >
             {SEQUENCE_STATUS_FILTERS.map((f) => (
               <option key={f} value={f}>
@@ -259,19 +259,19 @@ export function InstantlyLeadsTable({
           href={notStartedHref}
           className={`rounded-full px-3 py-1 text-xs font-medium ${
             notStartedOnly
-              ? 'bg-neutral-900 text-white'
-              : 'bg-white text-neutral-600 ring-1 ring-inset ring-neutral-200 hover:bg-neutral-100'
+              ? 'bg-ink text-white'
+              : 'bg-panel text-ink-3 ring-1 ring-inset ring-line hover:bg-divider'
           }`}
         >
           Not Started Yet ({summary.notStarted})
         </Link>
-        <span className="mx-1 h-4 w-px bg-neutral-200" />
-        <label className="flex items-center gap-1.5 text-xs text-neutral-500">
+        <span className="mx-1 h-4 w-px bg-line" />
+        <label className="flex items-center gap-1.5 text-xs text-ink-2">
           Sort by
           <select
             value={sort}
             onChange={(e) => navigateWith('sort', e.target.value === 'active' ? 'active' : 'synced')}
-            className="rounded-md border border-neutral-200 px-2 py-1 text-xs text-neutral-700"
+            className="rounded-md border border-line px-2 py-1 text-xs text-ink-3"
           >
             <option value="synced">Recently Synced</option>
             <option value="active">Most Recently Active</option>
@@ -286,26 +286,26 @@ export function InstantlyLeadsTable({
             href={interestHref(f)}
             className={`rounded-full px-3 py-1 text-xs font-medium ${
               filter === f
-                ? 'bg-neutral-900 text-white'
-                : 'bg-white text-neutral-600 ring-1 ring-inset ring-neutral-200 hover:bg-neutral-100'
+                ? 'bg-ink text-white'
+                : 'bg-panel text-ink-3 ring-1 ring-inset ring-line hover:bg-divider'
             }`}
           >
             {f} ({filterCounts[f] ?? 0})
           </Link>
         ))}
-        <span className="mx-1 h-4 w-px bg-neutral-200" />
+        <span className="mx-1 h-4 w-px bg-line" />
         <Link
           href={coldCallHref}
           className={`rounded-full px-3 py-1 text-xs font-medium ${
             coldCallOnly
-              ? 'bg-red-600 text-white'
-              : 'bg-white text-red-600 ring-1 ring-inset ring-red-200 hover:bg-red-50'
+              ? 'bg-pill-red-ink text-white'
+              : 'bg-panel text-pill-red-ink ring-1 ring-inset ring-pill-red hover:bg-pill-red'
           }`}
         >
           📞 Needs Cold Call ({coldCallCount})
         </Link>
       </div>
-      <p className="mb-4 text-xs text-neutral-400">
+      <p className="mb-4 text-xs text-ink-2">
         &quot;No Reply Yet&quot; is Instantly&apos;s own interest classification and includes
         both leads still waiting on a reply <em>and</em> leads not yet contacted — use{' '}
         <strong>Not Started Yet</strong> / <strong>Awaiting Reply</strong> above to tell them
@@ -313,37 +313,37 @@ export function InstantlyLeadsTable({
       </p>
 
       {hasActiveFilters && (
-        <p className="mb-3 text-sm text-neutral-600">
-          <span className="font-semibold text-neutral-900">{totalCount.toLocaleString()}</span> of{' '}
+        <p className="mb-3 text-sm text-ink-3">
+          <span className="font-semibold text-ink">{totalCount.toLocaleString()}</span> of{' '}
           {summary.total.toLocaleString()} leads match these filters
         </p>
       )}
 
       {leads.length === 0 ? (
-        <p className="text-sm text-neutral-500">No leads match this filter.</p>
+        <p className="text-sm text-ink-2">No leads match this filter.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white shadow-sm">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+        <div className="table-shell">
+          <table>
+            <thead>
               <tr>
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Company</th>
-                <th className="px-4 py-3 font-medium">Email</th>
-                <th className="px-4 py-3 font-medium">Phone</th>
-                <th className="px-4 py-3 font-medium">Reply</th>
-                <th className="px-4 py-3 font-medium">Campaign</th>
-                <th className="px-4 py-3 font-medium">Sequence</th>
-                <th className="px-4 py-3 font-medium">Last Activity</th>
-                <th className="px-4 py-3 font-medium">Interest</th>
-                <th className="px-4 py-3 font-medium">Assigned Rep</th>
-                <th className="px-4 py-3 font-medium">Sales Status</th>
-                <th className="px-4 py-3 font-medium"></th>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Reply</th>
+                <th>Campaign</th>
+                <th>Sequence</th>
+                <th>Last Activity</th>
+                <th>Interest</th>
+                <th>Assigned Rep</th>
+                <th>Sales Status</th>
+                <th></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody>
               {leads.map((lead) => (
-                <tr key={lead.id} className={lead.needs_cold_call ? 'bg-red-50/50' : undefined}>
-                  <td className="px-4 py-3 text-neutral-900">
+                <tr key={lead.id} className={lead.needs_cold_call ? 'bg-pill-red/50' : undefined}>
+                  <td className="text-ink">
                     {lead.linkedin_url ? (
                       <a
                         href={lead.linkedin_url}
@@ -357,36 +357,36 @@ export function InstantlyLeadsTable({
                       lead.name || lead.email
                     )}
                   </td>
-                  <td className="px-4 py-3 text-neutral-600">{lead.company || '—'}</td>
-                  <td className="px-4 py-3 text-neutral-600">
+                  <td className="text-ink-3">{lead.company || '—'}</td>
+                  <td className="text-ink-3">
                     {lead.email}
                     {lead.alternative_email && (
                       <button
                         onClick={() => setOpenReply(lead)}
-                        className="mt-0.5 block text-xs font-medium text-amber-700 hover:underline"
+                        className="mt-0.5 block text-xs font-medium text-pill-amber-ink hover:underline"
                         title="Other email(s) mentioned in their reply"
                       >
                         ✉️ {lead.alternative_email}
                       </button>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     {lead.reply_phone ? (
                       <button
                         onClick={() => setOpenReply(lead)}
-                        className="rounded-md bg-red-100 px-2 py-1 font-medium text-red-700 hover:bg-red-200"
+                        className="rounded-md bg-pill-red px-2 py-1 font-medium text-pill-red-ink hover:bg-pill-red"
                       >
                         📞 {lead.reply_phone}
                       </button>
                     ) : (
-                      <span className="text-neutral-600">{lead.phone || '—'}</span>
+                      <span className="text-ink-3">{lead.phone || '—'}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-neutral-600">
+                  <td className="text-ink-3">
                     {lead.reply_text ? (
                       <button
                         onClick={() => setOpenReply(lead)}
-                        className="rounded-md bg-neutral-100 px-2 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-200"
+                        className="rounded-md bg-divider px-2 py-1 text-xs font-medium text-ink-3 hover:bg-line"
                       >
                         View reply
                       </button>
@@ -394,21 +394,21 @@ export function InstantlyLeadsTable({
                       '—'
                     )}
                   </td>
-                  <td className="max-w-[160px] px-4 py-3 text-neutral-500">
+                  <td className="max-w-[160px] px-4 py-3 text-ink-2">
                     <p className="truncate" title={lead.campaign ?? ''}>
                       {lead.campaign || '—'}
                     </p>
                     {lead.campaign_status && (
                       <span
                         className={`mt-1 inline-block rounded-md px-1.5 py-0.5 text-[11px] font-medium ${
-                          CAMPAIGN_STATUS_COLORS[lead.campaign_status] ?? 'bg-neutral-100 text-neutral-500'
+                          CAMPAIGN_STATUS_COLORS[lead.campaign_status] ?? 'bg-divider text-ink-2'
                         }`}
                       >
                         {lead.campaign_status}
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     {(() => {
                       const stage = sequenceStage(lead);
                       return (
@@ -418,26 +418,26 @@ export function InstantlyLeadsTable({
                       );
                     })()}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-500">
+                  <td className="whitespace-nowrap px-4 py-3 text-ink-2">
                     {lead.last_reply_at ? new Date(lead.last_reply_at).toLocaleDateString() : '—'}
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <span
                       className={`rounded-md px-2 py-1 text-xs font-medium ${
-                        INTEREST_COLORS[lead.interest_status] ?? 'bg-neutral-100 text-neutral-600'
+                        INTEREST_COLORS[lead.interest_status] ?? 'bg-divider text-ink-3'
                       }`}
                     >
                       {lead.interest_status}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <RepSelect
                       reps={reps}
                       value={lead.assigned_rep_id}
                       onChange={(repId) => updateInstantlyLead(lead.id, { assigned_rep_id: repId })}
                     />
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <StatusSelect
                       options={statuses}
                       value={lead.sales_status}
@@ -448,7 +448,7 @@ export function InstantlyLeadsTable({
                       }
                     />
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <DeleteButton onDelete={() => deleteInstantlyLead(lead.id)} />
                   </td>
                 </tr>
@@ -456,7 +456,7 @@ export function InstantlyLeadsTable({
             </tbody>
           </table>
 
-          <div className="flex items-center justify-between border-t border-neutral-100 px-4 py-3 text-sm text-neutral-500">
+          <div className="flex items-center justify-between border-t border-divider px-4 py-3 text-sm text-ink-2">
             <span>
               {totalCount === 0
                 ? '0 results'
@@ -466,8 +466,8 @@ export function InstantlyLeadsTable({
               <Link
                 href={pageHref(Math.max(1, page - 1))}
                 aria-disabled={page <= 1}
-                className={`rounded-md px-3 py-1 ring-1 ring-inset ring-neutral-200 ${
-                  page <= 1 ? 'pointer-events-none text-neutral-300' : 'hover:bg-neutral-100'
+                className={`rounded-md px-3 py-1 ring-1 ring-inset ring-line ${
+                  page <= 1 ? 'pointer-events-none text-ink-2/50' : 'hover:bg-divider'
                 }`}
               >
                 Previous
@@ -475,8 +475,8 @@ export function InstantlyLeadsTable({
               <Link
                 href={pageHref(Math.min(totalPages, page + 1))}
                 aria-disabled={page >= totalPages}
-                className={`rounded-md px-3 py-1 ring-1 ring-inset ring-neutral-200 ${
-                  page >= totalPages ? 'pointer-events-none text-neutral-300' : 'hover:bg-neutral-100'
+                className={`rounded-md px-3 py-1 ring-1 ring-inset ring-line ${
+                  page >= totalPages ? 'pointer-events-none text-ink-2/50' : 'hover:bg-divider'
                 }`}
               >
                 Next
