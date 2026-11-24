@@ -74,38 +74,39 @@ export function BarTrend({
   if (weeks) {
     const weeklyMax = Math.max(1, ...weekly.map((w) => w.value));
     return (
-      <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-        <div className="mb-4 flex items-baseline justify-between gap-2">
-          <h3 className="text-sm font-medium text-neutral-700">{title}</h3>
-          <span className="text-xs text-neutral-500">Last {weeks} weeks</span>
+      <section className="card p-5">
+        <div className="mb-5 flex items-baseline justify-between gap-2">
+          <h2 className="text-[15px] font-semibold text-ink">{title}</h2>
+          <span className="text-[13px] text-ink-2">Last {weeks} weeks</span>
         </div>
-        <div className="flex h-40 items-end gap-2 border-b border-neutral-200">
+        <div className="flex h-[180px] items-end gap-2.5 border-b border-line">
           {weekly.map((w) => (
             <div key={w.date} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
-              <span className="text-[11px] text-neutral-500">{w.value}</span>
+              <span className="text-[11px] text-ink-2">{w.value}</span>
               <div
                 title={`Week of ${w.label}: ${w.value}`}
-                className={`w-full max-w-9 rounded-t ${colorClass}`}
-                style={{ height: `${w.value === 0 ? 0 : Math.max(3, (w.value / weeklyMax) * 100)}%` }}
+                className={`w-full max-w-[34px] rounded-t-md ${colorClass}`}
+                // 80% leaves room for the value label above the tallest bar.
+                style={{ height: `${w.value === 0 ? 0 : Math.max(2, (w.value / weeklyMax) * 80)}%` }}
               />
             </div>
           ))}
         </div>
-        <div className="mt-1.5 flex gap-2">
+        <div className="mt-2 flex gap-2.5">
           {weekly.map((w) => (
-            <span key={w.date} className="flex-1 truncate text-center text-[11px] text-neutral-500">
+            <span key={w.date} className="flex-1 truncate text-center text-[11px] text-ink-2">
               {w.label}
             </span>
           ))}
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+    <section className="card p-5">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-medium text-neutral-700">{title}</h3>
+        <h2 className="text-[15px] font-semibold text-ink">{title}</h2>
         <div className="flex items-center gap-1">
           {RANGES.map((r) => (
             <button
@@ -116,8 +117,8 @@ export function BarTrend({
               }}
               className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                 !custom && range === r.days
-                  ? 'bg-neutral-900 text-white'
-                  : 'text-neutral-500 hover:bg-neutral-100'
+                  ? 'bg-ink text-white'
+                  : 'text-ink-2 hover:bg-divider'
               }`}
             >
               {r.label}
@@ -131,7 +132,7 @@ export function BarTrend({
               })
             }
             className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-              custom ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:bg-neutral-100'
+              custom ? 'bg-ink text-white' : 'text-ink-2 hover:bg-divider'
             }`}
           >
             Custom
@@ -159,10 +160,10 @@ export function BarTrend({
         </div>
       )}
 
-      <p className="mb-2 text-xs text-neutral-400">{total.toLocaleString()} total</p>
+      <p className="mb-2 text-xs text-ink-2">{total.toLocaleString()} total</p>
 
       {total === 0 ? (
-        <p className="text-sm text-neutral-500">No data in this range.</p>
+        <p className="text-sm text-ink-2">No data in this range.</p>
       ) : (
         <div className="flex h-24 items-end gap-0.5">
           {displaySeries.map((d) => (
@@ -175,6 +176,6 @@ export function BarTrend({
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }

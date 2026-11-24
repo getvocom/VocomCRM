@@ -17,12 +17,14 @@ export function HotFlagButton({
       disabled={isPending}
       onClick={() => startTransition(() => onToggle(!hot))}
       title={hot ? 'Unflag as hot' : 'Flag as hot'}
-      className={`flex items-center justify-center disabled:opacity-50 ${
-        hot ? 'text-red-500' : 'text-neutral-300 hover:text-neutral-400'
+      aria-label={hot ? 'Hot lead, click to unflag' : 'Flag as hot'}
+      aria-pressed={hot}
+      className={`flex h-7 w-7 items-center justify-center rounded-[7px] hover:bg-divider disabled:opacity-50 ${
+        hot ? 'text-chart-orange' : 'text-chart-grey hover:text-ink-2'
       }`}
     >
-      <svg viewBox="0 0 24 24" className="h-4 w-4" fill={hot ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5 21V4a1 1 0 0 1 1-1h11.5a.5.5 0 0 1 .4.8L15 8l2.9 3.9a.5.5 0 0 1-.4.8H6" />
+      <svg width="16" height="16" viewBox="0 0 24 24" fill={hot ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2} strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5.5 2 1.5 3 3 3-1-3 0-6 0-8.5z" />
       </svg>
     </button>
   );

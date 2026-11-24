@@ -1,47 +1,107 @@
 // Pill colours for every status-like value in the app (lead source, status, priority,
-// phase, deal stage, region, division). Kept outside the 'use client' StatusSelect so
-// server components can read the map too — a plain value exported from a client module
-// arrives in a server component as a client reference, not the object.
-export const STATUS_COLORS: Record<string, string> = {
-  New: 'bg-neutral-100 text-neutral-700',
-  Contacted: 'bg-blue-100 text-blue-700',
-  Qualified: 'bg-amber-100 text-amber-700',
-  Prospecting: 'bg-neutral-100 text-neutral-700',
-  Connected: 'bg-blue-100 text-blue-700',
-  Conversation: 'bg-amber-100 text-amber-700',
-  Meeting: 'bg-purple-100 text-purple-700',
-  Won: 'bg-green-100 text-green-700',
-  Lost: 'bg-red-100 text-red-700',
-  Proposal: 'bg-blue-100 text-blue-700',
-  Negotiation: 'bg-amber-100 text-amber-700',
-  Open: 'bg-neutral-100 text-neutral-700',
-  'In Progress': 'bg-blue-100 text-blue-700',
-  Resolved: 'bg-green-100 text-green-700',
-  "Won't Fix": 'bg-red-100 text-red-700',
-  Website: 'bg-blue-100 text-blue-700',
-  'Cold Email': 'bg-orange-100 text-orange-700',
-  'Offline Event': 'bg-purple-100 text-purple-700',
-  Referral: 'bg-green-100 text-green-700',
-  Research: 'bg-amber-100 text-amber-700',
-  LinkedIn: 'bg-sky-100 text-sky-700',
-  Other: 'bg-neutral-100 text-neutral-500',
-  Low: 'bg-neutral-100 text-neutral-500',
-  Medium: 'bg-amber-100 text-amber-700',
-  High: 'bg-red-100 text-red-700',
-  // Region (accounts.region)
-  'US-East': 'bg-blue-100 text-blue-700',
-  'US-Central': 'bg-sky-100 text-sky-700',
-  'US-West': 'bg-cyan-100 text-cyan-700',
-  Canada: 'bg-red-100 text-red-700',
-  APAC: 'bg-teal-100 text-teal-700',
-  EMEA: 'bg-amber-100 text-amber-700',
-  // 'Other' already defined above (from LeadSource) — Region's 'Other' reuses it
-  // Division (deals.division)
-  'Vocom International': 'bg-blue-100 text-blue-700',
-  'Vocom AI': 'bg-purple-100 text-purple-700',
-  // Lead phase (website_leads.phase)
-  Unassigned: 'bg-neutral-100 text-neutral-500',
-  'Rep Assigned': 'bg-blue-100 text-blue-700',
-  'Cynthia Follow-up': 'bg-purple-100 text-purple-700',
-  'Escalated to Cold Call': 'bg-red-100 text-red-700'
+// phase, deal stage, region, division) — the one place they're defined.
+// Kept outside the 'use client' StatusSelect so server components can read the map too:
+// a plain value exported from a client module arrives in a server component as a client
+// reference, not the object.
+//
+// Tones are the brief's soft-background / dark-text pairs (all ≥4.5:1). The colours
+// themselves live in globals.css (--color-pill-*, --color-chart-*).
+
+type Tone = 'blue' | 'orange' | 'sky' | 'purple' | 'teal' | 'grey' | 'amber' | 'green' | 'red' | 'rust';
+
+// Written out in full so Tailwind can see every class name.
+const TONE_PILL: Record<Tone, string> = {
+  blue: 'bg-pill-blue text-pill-blue-ink',
+  orange: 'bg-pill-orange text-pill-orange-ink',
+  sky: 'bg-pill-sky text-pill-sky-ink',
+  purple: 'bg-pill-purple text-pill-purple-ink',
+  teal: 'bg-pill-teal text-pill-teal-ink',
+  grey: 'bg-pill-grey text-pill-grey-ink',
+  amber: 'bg-pill-amber text-pill-amber-ink',
+  green: 'bg-pill-green text-pill-green-ink',
+  red: 'bg-pill-red text-pill-red-ink',
+  rust: 'bg-pill-rust text-pill-rust-ink'
 };
+
+// Solid fills for charts (bars, legend dots), matched to each pill tone.
+const TONE_CHART: Record<Tone, string> = {
+  blue: 'bg-chart-blue',
+  orange: 'bg-chart-orange',
+  sky: 'bg-chart-sky',
+  purple: 'bg-chart-purple',
+  teal: 'bg-chart-teal',
+  grey: 'bg-chart-grey',
+  amber: 'bg-chart-amber',
+  green: 'bg-chart-green',
+  red: 'bg-chart-red',
+  rust: 'bg-chart-orange'
+};
+
+const VALUE_TONES: Record<string, Tone> = {
+  // Lead source
+  Website: 'blue',
+  'Cold Email': 'orange',
+  LinkedIn: 'sky',
+  Referral: 'purple',
+  'Offline Event': 'teal',
+  Research: 'amber',
+  Other: 'grey', // also Region 'Other'
+  // Lead status
+  New: 'grey',
+  Contacted: 'blue',
+  Qualified: 'amber',
+  Won: 'green',
+  Lost: 'red',
+  // Contact / account stages
+  Prospecting: 'grey',
+  Connected: 'blue',
+  Conversation: 'amber',
+  Meeting: 'purple',
+  // Deal status
+  Proposal: 'blue',
+  Negotiation: 'amber',
+  // Feedback status
+  Open: 'grey',
+  'In Progress': 'blue',
+  Resolved: 'green',
+  "Won't Fix": 'red',
+  // Priority
+  Low: 'grey',
+  Medium: 'amber',
+  High: 'rust',
+  // Region (accounts.region)
+  'US-East': 'blue',
+  'US-Central': 'sky',
+  'US-West': 'teal',
+  Canada: 'red',
+  APAC: 'green',
+  EMEA: 'amber',
+  // Division (deals.division)
+  'Vocom International': 'blue',
+  'Vocom AI': 'purple',
+  // Lead phase (website_leads.phase)
+  Unassigned: 'grey',
+  'Rep Assigned': 'blue',
+  'Cynthia Follow-up': 'purple',
+  'Escalated to Cold Call': 'rust'
+};
+
+export const DEFAULT_PILL = TONE_PILL.grey;
+
+// value → "bg-… text-…" pill classes.
+export const STATUS_COLORS: Record<string, string> = Object.fromEntries(
+  Object.entries(VALUE_TONES).map(([value, tone]) => [value, TONE_PILL[tone]])
+);
+
+// value → solid "bg-…" class for bars and legend dots.
+export const CHART_COLORS: Record<string, string> = Object.fromEntries(
+  Object.entries(VALUE_TONES).map(([value, tone]) => [value, TONE_CHART[tone]])
+);
+
+export function pillClass(value: string | null | undefined) {
+  return (value && STATUS_COLORS[value]) || DEFAULT_PILL;
+}
+
+export function chartClass(value: string | null | undefined) {
+  return (value && CHART_COLORS[value]) || TONE_CHART.grey;
+}

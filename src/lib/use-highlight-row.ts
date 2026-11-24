@@ -22,7 +22,8 @@ export function useHighlightRow() {
       ref: (el: HTMLTableRowElement | null) => {
         rowRefs.current[id] = el;
       },
-      className: id === highlightId ? 'bg-amber-50 ring-2 ring-inset ring-amber-300' : undefined
+      // row-highlight lets .table-shell tint the cells too (its cells have their own background).
+      className: id === highlightId ? 'row-highlight bg-amber-50 ring-2 ring-inset ring-amber-300' : undefined
     };
   }
 
