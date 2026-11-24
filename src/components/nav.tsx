@@ -4,52 +4,21 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from '@/app/actions';
+import { GlobalSearch } from '@/components/global-search';
+import { NAV_GROUPS } from '@/lib/nav-items';
+import { NotificationBell } from '@/components/notification-bell';
 
-const NAV_GROUPS = [
-  {
-    label: null,
-    links: [{ href: '/', label: 'Dashboard' }]
-  },
-  {
-    label: 'Sales',
-    links: [
-      { href: '/accounts', label: 'Accounts' },
-      { href: '/leads', label: 'Leads' },
-      { href: '/referrals', label: 'Referrals' },
-      { href: '/research', label: 'Research' },
-      { href: '/deals', label: 'Deals' },
-      { href: '/vendors', label: 'Vendors' },
-      { href: '/sales-dashboard', label: 'Sales Dashboard' }
-    ]
-  },
-  {
-    label: 'Marketing',
-    links: [
-      { href: '/marketing-results', label: 'Marketing Results' },
-      { href: '/instantly-leads', label: 'Instantly Leads' },
-      { href: '/linkedin-outreach', label: 'LinkedIn Outreach' },
-      { href: '/linkedin-activity', label: 'LinkedIn Activity' },
-      { href: '/linkedin-marketing', label: 'LinkedIn Marketing' },
-      { href: '/seo', label: 'SEO' }
-    ]
-  },
-  {
-    label: 'General',
-    links: [
-      { href: '/contacts', label: 'Contacts' },
-      { href: '/sales-team', label: 'Sales Team' },
-      { href: '/feedback', label: 'Feedback' }
-    ]
-  }
-];
-
-function VocomMark() {
+function Brand() {
   return (
-    <span className="flex flex-col items-center gap-[3px]">
-      {[10, 14, 18].map((w, i) => (
-        <span key={i} className="block h-[3px] rounded-full bg-vocom" style={{ width: w }} />
-      ))}
-    </span>
+    <Link href="/" className="flex min-w-0 items-center gap-2.5">
+      <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-ink text-sm font-bold text-white">
+        V
+      </span>
+      <span className="flex min-w-0 flex-col leading-tight">
+        <span className="text-sm font-semibold text-ink">Vocom CRM</span>
+        <span className="text-xs text-ink-2">Sales workspace</span>
+      </span>
+    </Link>
   );
 }
 
@@ -57,13 +26,9 @@ function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () 
   return (
     <>
       {NAV_GROUPS.map((group, i) => (
-        <div key={group.label ?? i} className={i > 0 ? 'mt-4' : undefined}>
-          {group.label && (
-            <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
-              {group.label}
-            </p>
-          )}
-          <div className="space-y-0.5">
+        <div key={group.label ?? i}>
+          {group.label && <p className="px-2.5 pb-1.5 pt-4 text-xs font-medium text-ink-2">{group.label}</p>}
+          <div className="space-y-px">
             {group.links.map((link) => {
               const active = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
               return (
@@ -71,8 +36,11 @@ function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () 
                   key={link.href}
                   href={link.href}
                   onClick={onNavigate}
-                  className={`block rounded-md px-3 py-2 text-sm font-medium transition ${
-                    active ? 'bg-vocom text-white' : 'text-neutral-600 hover:bg-vocom/8 hover:text-vocom'
+                  aria-current={active ? 'page' : undefined}
+                  className={`flex items-center rounded-lg px-2.5 py-[7px] text-sm transition-colors ${
+                    active
+                      ? 'bg-panel font-medium text-ink shadow-[0_0_0_1px_var(--color-line),0_1px_2px_rgba(0,0,0,0.04)]'
+                      : 'text-ink-3 hover:bg-divider hover:text-ink'
                   }`}
                 >
                   {link.label}
@@ -97,60 +65,62 @@ export function Nav() {
     router.refresh();
   }
 
+  const signOutButton = (
+    <button
+      onClick={handleSignOut}
+      className="block w-full rounded-lg px-2.5 py-[7px] text-left text-sm text-ink-2 hover:bg-divider hover:text-ink"
+    >
+      Sign out
+    </button>
+  );
+
   return (
     <>
       {/* Mobile top bar */}
-      <header className="flex items-center justify-between border-b border-neutral-200 bg-white px-4 py-3 md:hidden">
-        <div className="flex items-center gap-2">
-          <VocomMark />
-          <span className="text-sm font-bold tracking-wide text-vocom">VOCOM CRM</span>
+      <header className="flex items-center justify-between gap-2 border-b border-line bg-page px-4 py-3 md:hidden">
+        <Brand />
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          <button
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-3 hover:bg-divider"
+          >
+            {menuOpen ? (
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
+              </svg>
+            )}
+          </button>
         </div>
-        <button
-          onClick={() => setMenuOpen((open) => !open)}
-          aria-label="Toggle menu"
-          className="flex h-9 w-9 items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-100"
-        >
-          {menuOpen ? (
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          ) : (
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
-            </svg>
-          )}
-        </button>
       </header>
 
       {menuOpen && (
-        <nav className="border-b border-neutral-200 bg-white px-3 py-2 md:hidden">
+        <nav aria-label="Main" className="border-b border-line bg-page px-3 pb-3 pt-2 md:hidden">
+          <GlobalSearch onNavigate={() => setMenuOpen(false)} />
           <NavLinks pathname={pathname} onNavigate={() => setMenuOpen(false)} />
-          <button
-            onClick={handleSignOut}
-            className="mt-1 block w-full rounded-md px-3 py-2 text-left text-sm text-neutral-500 hover:bg-neutral-100"
-          >
-            Sign out
-          </button>
+          <div className="mt-3 border-t border-line pt-2">{signOutButton}</div>
         </nav>
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:sticky md:top-0 md:flex md:h-screen md:w-56 md:shrink-0 md:flex-col md:border-r md:border-neutral-200 md:bg-white">
-        <div className="flex items-center gap-2 px-5 py-6">
-          <VocomMark />
-          <span className="text-base font-bold tracking-wide text-vocom">VOCOM CRM</span>
+      <aside className="hidden md:sticky md:top-0 md:flex md:h-screen md:w-[248px] md:shrink-0 md:flex-col md:border-r md:border-line md:bg-page">
+        <div className="flex items-center justify-between gap-2 px-[22px] pb-3.5 pt-6">
+          <Brand />
+          <NotificationBell align="left" />
         </div>
-        <nav className="flex-1 overflow-y-auto px-3">
+        <div className="px-3">
+          <GlobalSearch shortcut />
+        </div>
+        <nav aria-label="Main" className="flex-1 overflow-y-auto px-3 pb-4">
           <NavLinks pathname={pathname} />
         </nav>
-        <div className="border-t border-neutral-200 px-3 py-4">
-          <button
-            onClick={handleSignOut}
-            className="block w-full rounded-md px-3 py-2 text-left text-sm text-neutral-500 hover:bg-neutral-100"
-          >
-            Sign out
-          </button>
-        </div>
+        <div className="border-t border-line px-3 py-3">{signOutButton}</div>
       </aside>
     </>
   );

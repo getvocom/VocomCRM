@@ -1,31 +1,214 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/*
+ * Vocom CRM design tokens (Phase 3 reskin). Every page should use these names
+ * (bg-page, bg-panel, border-line, border-divider, text-ink, text-ink-2, text-accent…)
+ * rather than raw hex values or neutral-* shades.
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Vocom brand — sampled from vocom.ai (logo, headline links, primary CTAs) */
-  --color-vocom: #7a1230;
-  --color-vocom-dark: #64142a;
-  --color-vocom-light: #f6c2da;
+  --color-page: #f6f6f4; /* app background, sidebar */
+  --color-panel: #ffffff; /* cards, tables, inputs */
+  --color-panel-2: #fafaf9; /* table header, row hover */
+  --color-line: #e7e6e2; /* borders */
+  --color-divider: #efefec; /* row dividers, chips, subtle fills */
+  --color-ink: #18181b; /* text, primary buttons */
+  --color-ink-3: #3f3f46; /* body text in dense tables */
+  --color-ink-2: #62626b; /* secondary text — don't go lighter, it must stay readable */
+  --color-accent: #3451d1;
+  --color-accent-dark: #2840a8;
+
+  /* Signal text for stat-card footers (≥4.5:1 on white) */
+  --color-good: #1f7a4d;
+  --color-warn: #b4441f;
+
+  /* Pill tones: soft background + dark text, all ≥4.5:1. Mapped to values in lib/pill-colors.ts */
+  --color-pill-blue: #eef1fd;
+  --color-pill-blue-ink: #2840a8;
+  --color-pill-orange: #fdf0e4;
+  --color-pill-orange-ink: #9a4a10;
+  --color-pill-sky: #e6f0fa;
+  --color-pill-sky-ink: #1d4f7a;
+  --color-pill-purple: #f1eafb;
+  --color-pill-purple-ink: #5b2e91;
+  --color-pill-teal: #e3f4f1;
+  --color-pill-teal-ink: #155f54;
+  --color-pill-grey: #efefec;
+  --color-pill-grey-ink: #3f3f46;
+  --color-pill-amber: #fbf1d6;
+  --color-pill-amber-ink: #7a5600;
+  --color-pill-green: #e2f3e8;
+  --color-pill-green-ink: #17663a;
+  --color-pill-red: #fbe6e5;
+  --color-pill-red-ink: #9b2c28;
+  --color-pill-rust: #fbe9e1;
+  --color-pill-rust-ink: #9a3412;
+
+  /* Chart fills (bars, legend dots) — one per pill tone */
+  --color-chart-blue: #3451d1;
+  --color-chart-orange: #d9782b;
+  --color-chart-sky: #2b6ca3;
+  --color-chart-purple: #7a4fbf;
+  --color-chart-teal: #1f8a7a;
+  --color-chart-grey: #a1a1aa;
+  --color-chart-amber: #d9a21b;
+  --color-chart-green: #1f8a4d;
+  --color-chart-red: #d9534f;
+
+  /* Legacy brand names, kept so pages not yet reskinned still build. They now resolve to
+     the new neutral palette (primary = near-black) so nothing clashes mid-migration. */
+  --color-vocom: #18181b;
+  --color-vocom-dark: #27272a;
+  --color-vocom-light: #efefec;
+
+  --radius-btn: 9px;
+  --radius-card: 14px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    background: var(--color-page);
+  }
+  body {
+    background: var(--color-page);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Shared building blocks. Prefer these over re-typing the same Tailwind strings per page. */
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: var(--radius-btn);
+    border: 1px solid var(--color-line);
+    background: var(--color-panel);
+    color: var(--color-ink);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 120ms, border-color 120ms;
+  }
+  .btn:hover {
+    background: var(--color-panel-2);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .btn-primary {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: #3f3f46;
+    border-color: #3f3f46;
+  }
+  .btn-sm {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+  /* Toggle buttons (aria-pressed) read as "on" with the primary look. */
+  .btn[aria-pressed='true'] {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: #fff;
+  }
+
+  .field {
+    height: 36px;
+    padding: 0 12px;
+    border-radius: var(--radius-btn);
+    border: 1px solid var(--color-line);
+    background: var(--color-panel);
+    color: var(--color-ink);
+    font-size: 14px;
+  }
+  .field::placeholder {
+    color: var(--color-ink-2);
+  }
+  .field:focus,
+  .btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+
+  .card {
+    background: var(--color-panel);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .count-chip {
+    border-radius: 999px;
+    background: var(--color-divider);
+    padding: 1px 7px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-ink-2);
+  }
+
+  /* Table shell: wrap a <table> in .table-shell; th/td pick up the look. */
+  .table-shell {
+    background: var(--color-panel);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    overflow: auto;
+  }
+  .table-shell table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 14px;
+    text-align: left;
+  }
+  .table-shell th {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--color-panel-2);
+    border-bottom: 1px solid var(--color-line);
+    padding: 11px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-ink-2);
+    white-space: nowrap;
+  }
+  .table-shell td {
+    border-bottom: 1px solid var(--color-divider);
+    padding: 8px 14px;
+    vertical-align: middle;
+    background: var(--color-panel);
+  }
+  .table-shell tbody tr:last-child td {
+    border-bottom: 0;
+  }
+  .table-shell tbody tr:hover td {
+    background: var(--color-panel-2);
+  }
+  .table-shell tbody tr.row-highlight td {
+    background: #fdf6e3;
+  }
 }
