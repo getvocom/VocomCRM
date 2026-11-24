@@ -28,6 +28,7 @@ import {
   type DealStage,
   type Rep
 } from '@/lib/types';
+import { PageHeader } from '@/components/ui';
 import { DealDrawer } from './deal-drawer';
 
 type Tab = 'overview' | 'opps' | 'pipeline' | 'quotes' | 'questions' | 'actions' | 'table';
@@ -138,7 +139,7 @@ export function OpportunitiesWorkspace({
   const tabs: { id: Tab; label: string; n?: number }[] = [
     { id: 'overview', label: 'Overview' },
     { id: 'opps', label: 'Opportunities', n: scoped.length },
-    { id: 'pipeline', label: 'Pipeline', n: open.length },
+    { id: 'pipeline', label: 'Board', n: open.length },
     { id: 'quotes', label: 'Vendor quotes', n: waitingQuotes.length },
     { id: 'questions', label: 'Open questions', n: openQuestions },
     { id: 'actions', label: 'Next actions', n: dueSoon.length },
@@ -149,14 +150,32 @@ export function OpportunitiesWorkspace({
 
   return (
     <div className="opp">
-      <div className="top">
-        <div>
-          <h1>Deals</h1>
-          <p className="sub">
+      <PageHeader
+        group="Sales"
+        title="Deals"
+        description={
+          <>
             {deals.length} opportunities across {new Set(deals.map((d) => d.account_id).filter(Boolean)).size} accounts. Today is{' '}
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}.
-          </p>
-        </div>
+          </>
+        }
+        actions={
+          <>
+            <input
+              className="search"
+              type="search"
+              placeholder="Search opportunities, accounts…"
+              aria-label="Search deals"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <button type="button" className="btn primary" aria-expanded={showNew} onClick={() => setShowNew((v) => !v)}>
+              + New opportunity
+            </button>
+          </>
+        }
+      />
+      <div className="top">
         <div className="tools">
           <div className="seg" role="group" aria-label="Type">
             {['All', ...DEAL_TYPES].map((t) => (
@@ -172,16 +191,6 @@ export function OpportunitiesWorkspace({
               </button>
             ))}
           </div>
-          <input
-            className="search"
-            type="search"
-            placeholder="Search opportunities, accounts…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <button type="button" className="btn primary" onClick={() => setShowNew((v) => !v)}>
-            New opportunity
-          </button>
         </div>
       </div>
 
@@ -270,11 +279,22 @@ export function OpportunitiesWorkspace({
         </>
       )}
 
-      {tab === 'pipeline' && <PipelineBoard deals={scoped} accountMap={accountMap} onOpen={setOpenId} />}
+      {tab === 'pipeline' && (
+        <PipelineBoard
+          deals={scoped}
+          accountMap={accountMap}
+          repMap={repMap}
+          onOpen={setOpenId}
+          onShowStage={(stage) => {
+            setStageFilter(stage);
+            setTab('opps');
+          }}
+        />
+      )}
       {tab === 'quotes' && <VendorQuotesView deals={scoped} onOpen={setOpenId} />}
       {tab === 'questions' && <QuestionsView deals={scoped} onOpen={setOpenId} />}
       {tab === 'actions' && <ActionsView deals={scoped} today={today} onOpen={setOpenId} />}
-      {tab === 'table' && <div style={{ background: '#fff', borderRadius: 10, padding: 12 }}>{tableView}</div>}
+      {tab === 'table' && tableView}
 
       {openDeal && <DealDrawer key={openDeal.id} deal={openDeal} accounts={accounts} reps={reps} onClose={() => setOpenId(null)} />}
     </div>
@@ -472,14 +492,31 @@ function OpportunityTable({
   );
 }
 
+// Board columns: the open stages plus Won. On hold and Lost stay reachable from the note
+// under the board (they open the Opportunities list filtered to that stage).
+const BOARD_STAGES: DealStage[] = [...OPEN_STAGES, 'Won'];
+
+function initials(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
 function PipelineBoard({
   deals,
   accountMap,
-  onOpen
+  repMap,
+  onOpen,
+  onShowStage
 }: {
   deals: Deal[];
   accountMap: Map<string, Account>;
+  repMap: Map<string, Rep>;
   onOpen: (id: string) => void;
+  onShowStage: (stage: DealStage) => void;
 }) {
   const [over, setOver] = useState<DealStage | null>(null);
   const [, start] = useTransition();
@@ -487,57 +524,100 @@ function PipelineBoard({
     const deal = deals.find((d) => d.id === id);
     if (deal && stageOf(deal) !== stage) start(() => updateOpportunity(id, { stage }));
   };
+  const parked = (['On hold', 'Lost'] as DealStage[]).map((stage) => ({
+    stage,
+    n: deals.filter((d) => stageOf(d) === stage).length
+  }));
   return (
-    <div className="board">
-      {DEAL_STAGES.map((stage) => {
-        const col = deals.filter((d) => stageOf(d) === stage);
-        const val = col.reduce((s, d) => s + d.value, 0);
-        return (
-          <div
-            key={stage}
-            className={`col ${over === stage ? 'over' : ''}`}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setOver(stage);
-            }}
-            onDragLeave={() => setOver((o) => (o === stage ? null : o))}
-            onDrop={(e) => {
-              e.preventDefault();
-              setOver(null);
-              move(e.dataTransfer.getData('text/plain'), stage);
-            }}
-          >
-            <h4>
-              <span>{stage}</span>
-              <span className="money">
-                {col.length}
-                {val ? ` · ${formatUsd(val)}` : ''}
-              </span>
-            </h4>
-            {col.map((d) => (
-              <div
-                key={d.id}
-                className="card"
-                draggable
-                onDragStart={(e) => e.dataTransfer.setData('text/plain', d.id)}
-                onClick={() => onOpen(d.id)}
-              >
-                <button type="button" className="lnk" onClick={() => onOpen(d.id)}>
-                  {dealTitle(d)}
-                </button>
-                <span className="muted">{d.account_id ? accountMap.get(d.account_id)?.name : 'No account'}</span>
-                <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  <Money n={d.value} />
-                  {d.priority && (
-                    <span className={`chip ${d.priority === 'High' ? 'crit' : d.priority === 'Med' ? 'warn' : ''}`}>{d.priority}</span>
-                  )}
-                </span>
-              </div>
-            ))}
-          </div>
-        );
-      })}
-    </div>
+    <>
+      <div className="board">
+        {BOARD_STAGES.map((stage) => {
+          const col = deals.filter((d) => stageOf(d) === stage);
+          const val = col.reduce((s, d) => s + d.value, 0);
+          return (
+            <section
+              key={stage}
+              aria-label={stage}
+              className={`col ${over === stage ? 'over' : ''}`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setOver(stage);
+              }}
+              onDragLeave={() => setOver((o) => (o === stage ? null : o))}
+              onDrop={(e) => {
+                e.preventDefault();
+                setOver(null);
+                move(e.dataTransfer.getData('text/plain'), stage);
+              }}
+            >
+              <header>
+                <h4>{stage}</h4>
+                <div className="meta">
+                  {col.length} {col.length === 1 ? 'deal' : 'deals'}
+                  {val ? ` · ${formatUsd(val)}` : ''}
+                </div>
+              </header>
+              {col.length === 0 && <p className="empty">Nothing here.</p>}
+              {col.map((d) => {
+                const repId = d.assigned_rep_id ?? (d.account_id ? accountMap.get(d.account_id)?.assigned_rep_id : null);
+                const rep = repId ? repMap.get(repId)?.name : null;
+                return (
+                  <article
+                    key={d.id}
+                    className="card"
+                    draggable
+                    onDragStart={(e) => e.dataTransfer.setData('text/plain', d.id)}
+                    onClick={() => onOpen(d.id)}
+                  >
+                    {(d.priority || d.deal_type) && (
+                      <div className="tags">
+                        {d.priority && <span className={`chip p-${d.priority}`}>{d.priority}</span>}
+                        {d.deal_type && <span className="chip type">{d.deal_type}</span>}
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      className="lnk"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpen(d.id);
+                      }}
+                    >
+                      {dealTitle(d)}
+                    </button>
+                    <span className="acct">{d.account_id ? accountMap.get(d.account_id)?.name : 'No account'}</span>
+                    <span className={`val ${d.value ? '' : 'na'}`}>{d.value ? formatUsd(d.value) : 'Not priced'}</span>
+                    <footer>
+                      <span>
+                        {d.next_action
+                          ? `${d.next_action}${d.next_action_date ? ` · ${formatDay(d.next_action_date)}` : ''}`
+                          : 'No next action'}
+                      </span>
+                      {rep && (
+                        <span className="rep" title={rep} aria-label={`Owner: ${rep}`}>
+                          {initials(rep)}
+                        </span>
+                      )}
+                    </footer>
+                  </article>
+                );
+              })}
+            </section>
+          );
+        })}
+      </div>
+      <p className="board-note">
+        {parked.map((p, i) => (
+          <span key={p.stage}>
+            {i > 0 && ' · '}
+            <button type="button" onClick={() => onShowStage(p.stage)}>
+              {p.stage}: {p.n}
+            </button>
+          </span>
+        ))}{' '}
+        — not on the board. Drag a card to another column to change its stage.
+      </p>
+    </>
   );
 }
 

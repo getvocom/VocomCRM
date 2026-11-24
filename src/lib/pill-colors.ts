@@ -60,6 +60,13 @@ const VALUE_TONES: Record<string, Tone> = {
   // Deal status
   Proposal: 'blue',
   Negotiation: 'amber',
+  // Deal stage (opportunity tracker). The Deals page draws these with .st-* classes in
+  // components/opp/opp.css using the same tones.
+  Lead: 'grey',
+  Quoting: 'sky',
+  Quoted: 'blue',
+  Negotiating: 'amber',
+  'On hold': 'grey',
   // Feedback status
   Open: 'grey',
   'In Progress': 'blue',
@@ -68,6 +75,7 @@ const VALUE_TONES: Record<string, Tone> = {
   // Priority
   Low: 'grey',
   Medium: 'amber',
+  Med: 'amber', // deal priority
   High: 'rust',
   // Region (accounts.region)
   'US-East': 'blue',
