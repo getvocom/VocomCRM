@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { bucketDaily } from '@/lib/daily-counts';
+import { bucketDaily, bucketWeekly } from '@/lib/daily-counts';
 
 // A card is only a few hundred px wide — cramming e.g. 365 daily bars into that renders
 // each one at sub-pixel width (invisible), even though the data's genuinely there. Once
@@ -33,14 +33,19 @@ const RANGES: { label: string; days: number | null }[] = [
 // `points` should be the raw (possibly unaggregated) dated values for the widest range
 // this chart should ever show — the toggle re-buckets client-side from this same array,
 // no extra server round-trip per click.
+//
+// Pass `weeks` for a fixed weekly view instead (e.g. Leads → Overview's "last 12 weeks"):
+// one labelled bar per calendar week, no range toggle.
 export function BarTrend({
   title,
   data,
-  colorClass = 'bg-neutral-800'
+  colorClass = 'bg-neutral-800',
+  weeks
 }: {
   title: string;
   data: { date: string; value: number }[];
   colorClass?: string;
+  weeks?: number;
 }) {
   const [range, setRange] = useState<number | null>(30);
   const [custom, setCustom] = useState<{ from: string; to: string } | null>(null);
@@ -64,6 +69,38 @@ export function BarTrend({
   const total = series.reduce((sum, d) => sum + d.value, 0);
   const displaySeries = useMemo(() => resample(series), [series]);
   const max = Math.max(1, ...displaySeries.map((d) => d.value));
+  const weekly = useMemo(() => (weeks ? bucketWeekly(data, weeks) : []), [data, weeks]);
+
+  if (weeks) {
+    const weeklyMax = Math.max(1, ...weekly.map((w) => w.value));
+    return (
+      <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+        <div className="mb-4 flex items-baseline justify-between gap-2">
+          <h3 className="text-sm font-medium text-neutral-700">{title}</h3>
+          <span className="text-xs text-neutral-500">Last {weeks} weeks</span>
+        </div>
+        <div className="flex h-40 items-end gap-2 border-b border-neutral-200">
+          {weekly.map((w) => (
+            <div key={w.date} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
+              <span className="text-[11px] text-neutral-500">{w.value}</span>
+              <div
+                title={`Week of ${w.label}: ${w.value}`}
+                className={`w-full max-w-9 rounded-t ${colorClass}`}
+                style={{ height: `${w.value === 0 ? 0 : Math.max(3, (w.value / weeklyMax) * 100)}%` }}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="mt-1.5 flex gap-2">
+          {weekly.map((w) => (
+            <span key={w.date} className="flex-1 truncate text-center text-[11px] text-neutral-500">
+              {w.label}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">

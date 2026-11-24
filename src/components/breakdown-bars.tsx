@@ -1,9 +1,11 @@
 export function BreakdownBars({
   title,
-  items
+  items,
+  footnote
 }: {
   title: string;
   items: { label: string; count: number; colorClass?: string }[];
+  footnote?: string;
 }) {
   const total = items.reduce((sum, i) => sum + i.count, 0) || 1;
   const nonZero = items.filter((i) => i.count > 0);
@@ -31,6 +33,7 @@ export function BreakdownBars({
           ))}
         </div>
       )}
+      {footnote && <p className="mt-4 text-xs leading-relaxed text-neutral-500">{footnote}</p>}
     </div>
   );
 }

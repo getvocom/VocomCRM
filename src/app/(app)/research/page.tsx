@@ -53,7 +53,13 @@ export default async function ResearchPage() {
         <BreakdownBars title="By status" items={statusBreakdown} />
       </div>
 
-      <LeadsTable leads={allLeads} reps={reps ?? []} deals={deals ?? []} statuses={LEAD_STATUSES} />
+      <LeadsTable
+        leads={allLeads}
+        reps={reps ?? []}
+        deals={deals ?? []}
+        statuses={LEAD_STATUSES}
+        visibleSources={['Research']}
+      />
     </div>
   );
 }

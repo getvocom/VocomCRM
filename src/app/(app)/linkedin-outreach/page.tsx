@@ -39,9 +39,9 @@ export default async function LinkedInOutreachPage() {
     <div>
       <h1 className="mb-1 text-xl font-semibold text-neutral-900">LinkedIn Outreach</h1>
       <p className="mb-6 text-sm text-neutral-500">
-        Leads sourced from LinkedIn outreach — kept separate from the main Leads list and
-        managed by Cynthia. Changing a lead&apos;s source away from LinkedIn moves it off
-        this page.
+        Leads sourced from LinkedIn outreach, managed by Cynthia. They also appear on Leads
+        under the LinkedIn tab — the same rows, so an edit here shows there too. Changing a
+        lead&apos;s source away from LinkedIn moves it off this page.
       </p>
 
       <LinkedInUploadForm />
@@ -51,7 +51,13 @@ export default async function LinkedInOutreachPage() {
         <BreakdownBars title="By status" items={statusBreakdown} />
       </div>
 
-      <LeadsTable leads={allLeads} reps={reps ?? []} deals={deals ?? []} statuses={LEAD_STATUSES} />
+      <LeadsTable
+        leads={allLeads}
+        reps={reps ?? []}
+        deals={deals ?? []}
+        statuses={LEAD_STATUSES}
+        visibleSources={['LinkedIn']}
+      />
     </div>
   );
 }

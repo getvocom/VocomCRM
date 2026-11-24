@@ -3,7 +3,14 @@ import { parseContactsCsv } from '@/lib/csv';
 import { createClient } from '@/lib/supabase/server';
 import type { LeadSource } from '@/lib/types';
 
-const ALLOWED_SOURCES: LeadSource[] = ['Website', 'Offline Event', 'Referral', 'Research', 'Other'];
+const ALLOWED_SOURCES: LeadSource[] = [
+  'Website',
+  'Cold Email',
+  'Offline Event',
+  'Referral',
+  'Research',
+  'Other'
+];
 
 // Leads/Referrals/Research don't reliably have a LinkedIn URL or even an email (Research
 // leads in particular are company-level research with no named contact at all — see

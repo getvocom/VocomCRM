@@ -3,7 +3,7 @@ import { BarTrend } from '@/components/bar-trend';
 import { BreakdownBars } from '@/components/breakdown-bars';
 import { formatCompact } from '@/lib/format';
 import { createClient } from '@/lib/supabase/server';
-import { ACTIVITY_TYPES } from '@/lib/types';
+import { ACTIVITY_TYPES, DIRECT_LEADS_EXCLUDED_FILTER } from '@/lib/types';
 import { InterestBreakdown } from './interest-breakdown';
 
 const INTEREST_LABELS = [
@@ -36,7 +36,8 @@ export default async function DashboardPage() {
     supabase
       .from('website_leads')
       .select('*', { count: 'exact', head: true })
-      .in('source', ['Website', 'Offline Event', 'Other']),
+      // Same set as the Leads page: everything except Research.
+      .neq('source', 'Research'),
     supabase.from('website_leads').select('*', { count: 'exact', head: true }).eq('source', 'LinkedIn'),
     supabase.from('instantly_leads').select('*', { count: 'exact', head: true }),
     supabase.from('linkedin_activity').select('*', { count: 'exact', head: true }),
@@ -55,7 +56,7 @@ export default async function DashboardPage() {
       .select('*', { count: 'exact', head: true })
       .not('status', 'in', '("Resolved","Won\'t Fix")'),
     supabase.from('instantly_leads').select('last_reply_at').not('last_reply_at', 'is', null),
-    supabase.from('website_leads').select('created_at').in('source', ['Website', 'Offline Event', 'Other']),
+    supabase.from('website_leads').select('created_at').not('source', 'in', DIRECT_LEADS_EXCLUDED_FILTER),
     supabase.from('linkedin_activity').select('activity'),
     ...INTEREST_LABELS.map((label) =>
       supabase
