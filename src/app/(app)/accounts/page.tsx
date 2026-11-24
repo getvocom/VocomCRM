@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { isOpen } from '@/lib/opportunities';
 import type { Account, AccountContact, Deal, Rep } from '@/lib/types';
+import { PageHeaderPanels } from '@/components/page-header-panels';
+import { StatCard } from '@/components/ui';
 import { AddAccountForm } from './add-account-form';
 import { AccountsTable } from './table';
 
@@ -42,28 +44,21 @@ export default async function AccountsPage() {
     }
   });
 
+  const linkedDeals = (deals ?? []).filter((d) => d.account_id).length;
+
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold text-neutral-900">Accounts</h1>
-      <p className="mb-6 text-sm text-neutral-500">
-        Company-level records. Each account can have its own contacts and deals — link deals and
-        leads to an account as you work them.
-      </p>
+      <PageHeaderPanels
+        group="Sales"
+        title="Accounts"
+        description="Company-level records. Each account can have its own contacts and deals — link deals and leads to an account as you work them."
+        panels={[{ key: 'add', label: '+ Add account', content: <AddAccountForm reps={reps ?? []} /> }]}
+      />
 
-      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-          <p className="text-sm text-neutral-500">Total accounts</p>
-          <p className="mt-1 truncate text-2xl font-semibold text-neutral-900 sm:text-3xl">{allAccounts.length}</p>
-        </div>
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-          <p className="text-sm text-neutral-500">Linked deals</p>
-          <p className="mt-1 truncate text-2xl font-semibold text-neutral-900 sm:text-3xl">
-            {(deals ?? []).filter((d) => d.account_id).length}
-          </p>
-        </div>
+      <div className="mb-6 mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+        <StatCard label="Total accounts" value={allAccounts.length.toLocaleString()} />
+        <StatCard label="Linked deals" value={linkedDeals.toLocaleString()} />
       </div>
-
-      <AddAccountForm reps={reps ?? []} />
 
       <AccountsTable
         accounts={allAccounts}

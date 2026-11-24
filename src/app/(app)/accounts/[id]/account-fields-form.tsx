@@ -20,7 +20,7 @@ function TextField({
   const [isPending, startTransition] = useTransition();
   return (
     <div>
-      <label className="mb-1 block text-xs font-medium text-neutral-500">{label}</label>
+      <label className="mb-1 block text-xs font-medium text-ink-2">{label}</label>
       <input
         type="text"
         defaultValue={value ?? ''}
@@ -29,7 +29,7 @@ function TextField({
         onBlur={(e) => {
           if (e.target.value !== (value ?? '')) startTransition(() => onChange(e.target.value));
         }}
-        className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900 disabled:opacity-50"
+        className="field w-full disabled:opacity-50"
       />
     </div>
   );
@@ -37,7 +37,7 @@ function TextField({
 
 export function AccountFieldsForm({ account, reps }: { account: Account; reps: Rep[] }) {
   return (
-    <div className="grid grid-cols-1 gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
+    <div className="card grid grid-cols-1 gap-3 p-5 sm:grid-cols-2 lg:grid-cols-4">
       <TextField label="Name" value={account.name} onChange={(name) => updateAccount(account.id, { name })} />
       <TextField label="HQ" value={account.hq} onChange={(hq) => updateAccount(account.id, { hq })} />
       <TextField label="Website" value={account.website} onChange={(website) => updateAccount(account.id, { website })} />
@@ -52,7 +52,7 @@ export function AccountFieldsForm({ account, reps }: { account: Account; reps: R
         onChange={(company_size) => updateAccount(account.id, { company_size })}
       />
       <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-500">Region</label>
+        <label className="mb-1 block text-xs font-medium text-ink-2">Region</label>
         <StatusSelect
           options={['Unset', ...REGIONS]}
           value={account.region ?? 'Unset'}
@@ -60,7 +60,7 @@ export function AccountFieldsForm({ account, reps }: { account: Account; reps: R
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-500">Assigned rep</label>
+        <label className="mb-1 block text-xs font-medium text-ink-2">Assigned rep</label>
         <RepSelect
           reps={reps}
           value={account.assigned_rep_id}
@@ -68,7 +68,7 @@ export function AccountFieldsForm({ account, reps }: { account: Account; reps: R
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-500">Type</label>
+        <label className="mb-1 block text-xs font-medium text-ink-2">Type</label>
         <StatusSelect
           options={['Unset', ...ACCOUNT_KINDS]}
           value={account.kind ?? 'Unset'}
@@ -76,7 +76,7 @@ export function AccountFieldsForm({ account, reps }: { account: Account; reps: R
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-500">Status</label>
+        <label className="mb-1 block text-xs font-medium text-ink-2">Status</label>
         <StatusSelect
           options={['Unset', ...ACCOUNT_STATUSES]}
           value={account.account_status ?? 'Unset'}
@@ -93,7 +93,7 @@ export function AccountFieldsForm({ account, reps }: { account: Account; reps: R
       />
       <TextField label="Champions" value={account.champions} onChange={(champions) => updateAccount(account.id, { champions })} />
       <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-500">Supporters (also working this account)</label>
+        <label className="mb-1 block text-xs font-medium text-ink-2">Supporters (also working this account)</label>
         <div className="flex flex-wrap gap-1.5">
           {reps.map((rep) => {
             const on = account.supporters.includes(rep.id);
@@ -106,8 +106,9 @@ export function AccountFieldsForm({ account, reps }: { account: Account; reps: R
                     supporters: on ? account.supporters.filter((id) => id !== rep.id) : [...account.supporters, rep.id]
                   })
                 }
+                aria-pressed={on}
                 className={`rounded-full border px-2.5 py-0.5 text-xs ${
-                  on ? 'border-vocom bg-vocom-light text-vocom-dark' : 'border-neutral-300 text-neutral-500'
+                  on ? 'border-ink bg-ink text-white' : 'border-line bg-panel text-ink-3 hover:bg-divider'
                 }`}
               >
                 {rep.name}
@@ -132,7 +133,7 @@ function InfoRows({ account }: { account: Account }) {
   const save = (info: KeyValue[]) => startTransition(() => updateAccount(account.id, { info }));
   return (
     <div>
-      <label className="mb-1 block text-xs font-medium text-neutral-500">Account info</label>
+      <label className="mb-1 block text-xs font-medium text-ink-2">Account info</label>
       <div className="space-y-1.5">
         {account.info.map((row, i) => (
           <div key={`${row.k}-${i}`} className="flex gap-2">
@@ -140,18 +141,18 @@ function InfoRows({ account }: { account: Account }) {
               defaultValue={row.k}
               placeholder="Label"
               onBlur={(e) => e.target.value !== row.k && save(account.info.map((r, j) => (j === i ? { ...r, k: e.target.value } : r)))}
-              className="w-40 rounded-md border border-neutral-300 px-2 py-1 text-sm"
+              className="w-40 field h-8"
             />
             <input
               defaultValue={row.v}
               placeholder="Value"
               onBlur={(e) => e.target.value !== row.v && save(account.info.map((r, j) => (j === i ? { ...r, v: e.target.value } : r)))}
-              className="min-w-0 flex-1 rounded-md border border-neutral-300 px-2 py-1 text-sm"
+              className="min-w-0 flex-1 field h-8"
             />
             <button
               type="button"
               onClick={() => save(account.info.filter((_, j) => j !== i))}
-              className="px-2 text-neutral-400 hover:text-red-600"
+              className="px-2 text-ink-2 hover:text-red-600"
               aria-label="Remove row"
             >
               ×
@@ -161,7 +162,7 @@ function InfoRows({ account }: { account: Account }) {
         <button
           type="button"
           onClick={() => save([...account.info, { k: '', v: '' }])}
-          className="rounded-md border border-dashed border-neutral-300 px-2.5 py-1 text-xs text-neutral-500"
+          className="rounded-md border border-dashed border-line px-2.5 py-1 text-xs text-ink-2"
         >
           Add info row
         </button>

@@ -30,20 +30,20 @@ export default async function AccountDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div>
-      <p className="mb-1 text-xs text-neutral-400">
-        <Link href="/accounts" className="hover:underline">
+      <nav aria-label="Breadcrumb" className="mb-1 text-[13px] text-ink-2">
+        <Link href="/accounts" className="hover:text-ink hover:underline">
           Accounts
         </Link>{' '}
-        / {account.name}
-      </p>
-      <h1 className="mb-6 text-xl font-semibold text-neutral-900">{account.name}</h1>
+        / <span aria-current="page">{account.name}</span>
+      </nav>
+      <h1 className="mb-6 text-[32px] font-semibold leading-tight tracking-[-0.02em] text-ink">{account.name}</h1>
 
       <AccountFieldsForm account={account} reps={reps ?? []} />
 
-      <h2 className="mb-3 mt-8 text-sm font-semibold text-neutral-700">Contacts</h2>
+      <h2 className="mb-3 mt-8 text-[15px] font-semibold text-ink">Contacts</h2>
       <AccountContactsTable accountId={account.id} contacts={contacts ?? []} />
 
-      <h2 className="mb-3 mt-8 text-sm font-semibold text-neutral-700">Deals</h2>
+      <h2 className="mb-3 mt-8 text-[15px] font-semibold text-ink">Deals</h2>
       <AccountDealsTable deals={deals ?? []} reps={reps ?? []} leadCountByDeal={leadCountByDeal} />
     </div>
   );

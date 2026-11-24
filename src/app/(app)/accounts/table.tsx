@@ -6,21 +6,34 @@ import { deleteAccount, updateAccount } from '@/app/actions';
 import { DeleteButton } from '@/components/delete-button';
 import { RepSelect } from '@/components/rep-select';
 import { StatusSelect } from '@/components/status-select';
+import { Pill } from '@/components/ui';
 import { formatUsd } from '@/lib/opportunities';
 import { ACCOUNT_KINDS, ACCOUNT_STATUSES, REGIONS, type Account, type Rep } from '@/lib/types';
 import { useHighlightRow } from '@/lib/use-highlight-row';
 
-function Cell({ value, onChange, width = 'w-32' }: { value: string | null; onChange: (value: string) => Promise<void>; width?: string }) {
+function Cell({
+  value,
+  onChange,
+  width = 'w-32',
+  label
+}: {
+  value: string | null;
+  onChange: (value: string) => Promise<void>;
+  width?: string;
+  label: string;
+}) {
   const [isPending, startTransition] = useTransition();
   return (
     <input
       type="text"
+      aria-label={label}
+      placeholder="—"
       defaultValue={value ?? ''}
       disabled={isPending}
       onBlur={(e) => {
         if (e.target.value !== (value ?? '')) startTransition(() => onChange(e.target.value));
       }}
-      className={`${width} rounded-md border border-neutral-300 px-2 py-1 text-sm text-neutral-900 disabled:opacity-50`}
+      className={`${width} cell-input`}
     />
   );
 }
@@ -67,108 +80,114 @@ export function AccountsTable({
   }, [accounts, search, sortKey, dealCounts]);
 
   if (accounts.length === 0) {
-    return <p className="text-sm text-neutral-500">No accounts yet.</p>;
+    return <p className="card p-6 text-sm text-ink-2">No accounts yet.</p>;
   }
 
   return (
     <div>
-      <div className="mb-3 flex flex-wrap items-center gap-3">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search name, HQ, website, industry…"
-          className="w-full max-w-xs rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-900"
-        />
-        <label className="flex items-center gap-1.5 text-xs text-neutral-500">
+      <div className="mb-3.5 flex flex-wrap items-center gap-2">
+        <label className="flex h-[38px] max-w-[460px] flex-[1_1_320px] items-center gap-2 rounded-[10px] border border-line bg-panel px-3 text-ink-2 focus-within:border-accent">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
+          </svg>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search name, HQ, website, industry…"
+            aria-label="Search accounts"
+            className="min-w-0 flex-1 border-0 bg-transparent text-sm text-ink outline-none placeholder:text-ink-2"
+          />
+        </label>
+        <label className="flex items-center gap-2 text-[13px] text-ink-2">
           Sort by
-          <select
-            value={sortKey}
-            onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="rounded-md border border-neutral-200 px-2 py-1 text-xs text-neutral-700"
-          >
+          <select value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)} className="btn cursor-pointer pr-2">
             <option value="name">Name (A-Z)</option>
             <option value="created_at">Most Recent</option>
             <option value="deals_desc">Deals (Most)</option>
           </select>
         </label>
-        {search && (
-          <span className="text-xs text-neutral-400">
-            {filteredAndSorted.length} of {accounts.length}
-          </span>
-        )}
+        <div className="flex-1" />
+        <span className="text-[13px] text-ink-2">
+          {search ? `${filteredAndSorted.length} of ${accounts.length} accounts` : `${accounts.length} accounts`}
+        </span>
       </div>
 
       {filteredAndSorted.length === 0 ? (
-        <p className="text-sm text-neutral-500">No accounts match this search.</p>
+        <p className="card p-12 text-center text-sm text-ink-2">No accounts match this search.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white shadow-sm">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+        <div className="table-shell max-h-[70vh]">
+          <table>
+            <thead>
               <tr>
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">HQ</th>
-                <th className="px-4 py-3 font-medium">Website</th>
-                <th className="px-4 py-3 font-medium">Industry</th>
-                <th className="px-4 py-3 font-medium">Size</th>
-                <th className="px-4 py-3 font-medium">Region</th>
-                <th className="px-4 py-3 font-medium">Assigned Rep</th>
-                <th className="px-4 py-3 font-medium">Type</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Open value</th>
-                <th className="px-4 py-3 font-medium">Stages</th>
-                <th className="px-4 py-3 font-medium">POCs</th>
-                <th className="px-4 py-3 font-medium">Deals</th>
-                <th className="px-4 py-3 font-medium"></th>
+                <th>Name</th>
+                <th>HQ</th>
+                <th>Website</th>
+                <th>Industry</th>
+                <th>Size</th>
+                <th>Region</th>
+                <th>Assigned Rep</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Open value</th>
+                <th>Stages</th>
+                <th>POCs</th>
+                <th>Deals</th>
+                <th></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody>
               {filteredAndSorted.map((account) => (
                 <tr key={account.id} {...rowProps(account.id)}>
-                  <td className="px-4 py-3 text-neutral-900">
-                    <Link href={`/accounts/${account.id}`} className="font-medium hover:underline">
+                  <td className="whitespace-nowrap">
+                    <Link href={`/accounts/${account.id}`} className="font-medium text-ink hover:text-accent hover:underline">
                       {account.name}
                     </Link>
                   </td>
-                  <td className="px-4 py-3">
-                    <Cell value={account.hq} onChange={(hq) => updateAccount(account.id, { hq })} />
+                  <td>
+                    <Cell label="HQ" value={account.hq} onChange={(hq) => updateAccount(account.id, { hq })} />
                   </td>
-                  <td className="px-4 py-3">
-                    <Cell value={account.website} onChange={(website) => updateAccount(account.id, { website })} />
+                  <td>
+                    <Cell label="Website" value={account.website} onChange={(website) => updateAccount(account.id, { website })} />
                   </td>
-                  <td className="px-4 py-3">
-                    <Cell value={account.industry} onChange={(industry) => updateAccount(account.id, { industry })} />
+                  <td>
+                    <Cell label="Industry" value={account.industry} onChange={(industry) => updateAccount(account.id, { industry })} />
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <Cell
+                      label="Company size"
                       value={account.company_size}
                       onChange={(company_size) => updateAccount(account.id, { company_size })}
                       width="w-20"
                     />
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <StatusSelect
+                      ariaLabel="Region"
                       options={['Unset', ...REGIONS]}
                       value={account.region ?? 'Unset'}
                       onChange={(region) => updateAccount(account.id, { region: region === 'Unset' ? null : region })}
                     />
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <RepSelect
                       reps={reps}
                       value={account.assigned_rep_id}
                       onChange={(repId) => updateAccount(account.id, { assigned_rep_id: repId })}
                     />
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <StatusSelect
+                      ariaLabel="Type"
                       options={['Unset', ...ACCOUNT_KINDS]}
                       value={account.kind ?? 'Unset'}
                       onChange={(kind) => updateAccount(account.id, { kind: kind === 'Unset' ? null : (kind as Account['kind']) })}
                     />
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <StatusSelect
+                      ariaLabel="Status"
                       options={['Unset', ...ACCOUNT_STATUSES]}
                       value={account.account_status ?? 'Unset'}
                       onChange={(s) =>
@@ -176,18 +195,27 @@ export function AccountsTable({
                       }
                     />
                   </td>
-                  <td className="px-4 py-3 font-mono text-neutral-700">
+                  <td className="whitespace-nowrap text-ink-3 tabular-nums">
                     {dealSummary[account.id]?.openValue ? formatUsd(dealSummary[account.id].openValue) : '—'}
                   </td>
-                  <td className="px-4 py-3 text-xs text-neutral-600">
-                    {Object.entries(dealSummary[account.id]?.stages ?? {})
-                      .map(([stage, n]) => `${stage} ${n}`)
-                      .join(', ') || '—'}
+                  <td>
+                    {Object.keys(dealSummary[account.id]?.stages ?? {}).length === 0 ? (
+                      <span className="text-ink-2">—</span>
+                    ) : (
+                      <div className="flex min-w-56 flex-wrap gap-1">
+                        {Object.entries(dealSummary[account.id].stages).map(([stage, n]) => (
+                          <Pill key={stage} value={stage}>
+                            {stage} {n}
+                          </Pill>
+                        ))}
+                      </div>
+                    )}
                   </td>
-                  <td className="px-4 py-3 text-neutral-600">{contactCounts[account.id] ?? 0}</td>
-                  <td className="px-4 py-3 text-neutral-600">{dealCounts[account.id] ?? 0}</td>
-                  <td className="px-4 py-3">
+                  <td className="text-ink-3">{contactCounts[account.id] ?? 0}</td>
+                  <td className="text-ink-3">{dealCounts[account.id] ?? 0}</td>
+                  <td>
                     <DeleteButton
+                      label="Delete account"
                       onDelete={() => deleteAccount(account.id)}
                       confirmMessage={`Delete "${account.name}"? Its contacts will be deleted too. Linked deals/leads stay, just unlinked from this account. This can't be undone.`}
                     />
