@@ -1,3 +1,4 @@
+import { getLastContacts } from '@/lib/email-activity';
 import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/ui';
 import { LEAD_STATUSES, type InstantlyLead, type Rep } from '@/lib/types';
@@ -100,6 +101,11 @@ export default async function InstantlyLeadsPage({
     )
   ]);
 
+  const lastContacts = await getLastContacts(
+    supabase,
+    (leads ?? []).flatMap((l) => [l.email, ...(l.alternative_email?.split(/[,;\s]+/) ?? [])])
+  );
+
   const filterCountByLabel = Object.fromEntries(
     INTEREST_FILTERS.map((f, i) => [f, filterCounts[i].count ?? 0])
   );
@@ -130,6 +136,7 @@ export default async function InstantlyLeadsPage({
         actions={<SyncNowButton />}
       />
       <InstantlyLeadsTable
+        lastContacts={lastContacts}
         leads={leads ?? []}
         reps={reps ?? []}
         statuses={LEAD_STATUSES}

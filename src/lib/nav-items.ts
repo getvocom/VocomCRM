@@ -31,6 +31,7 @@ export const NAV_GROUPS: { label: string | null; links: { href: string; label: s
     label: 'General',
     links: [
       { href: '/contacts', label: 'Contacts' },
+      { href: '/email-sync', label: 'Email Sync' },
       { href: '/sales-team', label: 'Sales Team' },
       { href: '/feedback', label: 'Feedback' }
     ]

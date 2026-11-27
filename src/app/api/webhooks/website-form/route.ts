@@ -1,6 +1,6 @@
-import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { verifySignature } from '@/lib/webhook-signature';
 
 // Receives website contact-form submissions from the vocom.ai site (hosted on Cloudflare).
 // The browser never talks to this route: the site's own Cloudflare function (see
@@ -12,26 +12,12 @@ import { createAdminClient } from '@/lib/supabase/admin';
 //   x-vocom-signature: sha256=<hex>
 // Requests older than 10 minutes are rejected so a captured request cannot be replayed later.
 
-const MAX_AGE_SECONDS = 600;
-
-function verify(rawBody: string, timestamp: string, header: string, secret: string) {
-  const age = Math.abs(Date.now() / 1000 - Number(timestamp));
-  if (!Number.isFinite(age) || age > MAX_AGE_SECONDS) return false;
-  const expected =
-    'sha256=' + crypto.createHmac('sha256', secret).update(`${timestamp}.${rawBody}`).digest('hex');
-  const a = Buffer.from(expected);
-  const b = Buffer.from(header);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
-}
-
 export async function POST(request: NextRequest) {
   const secret = process.env.WEBSITE_FORM_SECRET;
   if (!secret) return NextResponse.json({ error: 'webhook not configured' }, { status: 500 });
 
   const rawBody = await request.text();
-  const timestamp = request.headers.get('x-vocom-timestamp') ?? '';
-  const signature = request.headers.get('x-vocom-signature') ?? '';
-  if (!timestamp || !signature || !verify(rawBody, timestamp, signature, secret)) {
+  if (!verifySignature(rawBody, request.headers, secret)) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 

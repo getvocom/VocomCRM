@@ -21,6 +21,8 @@ import {
   type Rep
 } from '@/lib/types';
 import { useHighlightRow } from '@/lib/use-highlight-row';
+import { LastContactCell } from '@/components/last-contact';
+import { latestContact, type LastContactMap } from '@/lib/email-activity';
 
 // Columns pinned to the left while the table scrolls sideways. The Name column starts
 // where the Hot column ends, so these two widths have to match the <td> widths below.
@@ -33,6 +35,7 @@ const OPTIONAL_COLUMNS = [
   { key: 'date', label: 'Date' },
   { key: 'job_title', label: 'Job Title' },
   { key: 'email', label: 'Email' },
+  { key: 'last_contact', label: 'Last Contact' },
   { key: 'phone', label: 'Phone' },
   { key: 'company', label: 'Company' },
   { key: 'deal', label: 'Deal' },
@@ -161,7 +164,8 @@ export function LeadsTable({
   statuses,
   visibleSources,
   initialHotOnly = false,
-  initialQuery = ''
+  initialQuery = '',
+  lastContacts = {}
 }: {
   leads: Lead[];
   reps: Rep[];
@@ -174,6 +178,8 @@ export function LeadsTable({
   initialHotOnly?: boolean;
   // From the sidebar search (?q=).
   initialQuery?: string;
+  // Latest synced email per lowercase address.
+  lastContacts?: LastContactMap;
 }) {
   const { rowProps } = useHighlightRow();
   const [query, setQuery] = useState(initialQuery);
@@ -387,6 +393,15 @@ export function LeadsTable({
                   {show('email') && (
                     <td>
                       <Cell label="Email" value={lead.email} onChange={(email) => updateLead(lead.id, { email })} width="w-52" />
+                    </td>
+                  )}
+                  {show('last_contact') && (
+                    <td>
+                      <LastContactCell
+                        contact={latestContact(lastContacts, [lead.email])}
+                        emails={lead.email ? [lead.email] : []}
+                        title={lead.name || lead.company || 'this lead'}
+                      />
                     </td>
                   )}
                   {show('phone') && (

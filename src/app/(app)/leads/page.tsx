@@ -1,6 +1,7 @@
 import { AddLeadForm } from '@/components/add-lead-form';
 import { LeadsUploadForm } from '@/components/leads-upload-form';
 import { TabNav } from '@/components/ui';
+import { getLastContacts } from '@/lib/email-activity';
 import { createClient } from '@/lib/supabase/server';
 import { LEADS_SOURCE_TABS, type LeadsTabSlug } from '@/lib/lead-tabs';
 import {
@@ -46,6 +47,7 @@ export default async function LeadsPage({
   ]);
 
   const allLeads = leads ?? [];
+  const lastContacts = await getLastContacts(supabase, allLeads.map((l) => l.email));
   const tabLeads = sourceTab ? allLeads.filter((l) => l.source === sourceTab.source) : allLeads;
 
   const tabs: { slug: LeadsTabSlug; label: string; count?: number }[] = [
@@ -91,6 +93,7 @@ export default async function LeadsPage({
         <LeadsOverview leads={allLeads} />
       ) : (
         <LeadsTable
+          lastContacts={lastContacts}
           leads={tabLeads}
           reps={reps ?? []}
           deals={deals ?? []}

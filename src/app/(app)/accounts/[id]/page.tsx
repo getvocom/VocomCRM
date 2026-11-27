@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { EmailTimeline } from '@/components/email-timeline';
+import { outsideAddresses } from '@/lib/email-addresses';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import type { Account, AccountContact, Deal, Rep } from '@/lib/types';
@@ -21,12 +23,17 @@ export default async function AccountDetailPage({ params }: { params: Promise<{ 
 
   const dealIds = (deals ?? []).map((d) => d.id);
   const leadCountByDeal = new Map<string, number>();
+  const leadEmails: (string | null)[] = [];
   if (dealIds.length > 0) {
-    const { data: leads } = await supabase.from('website_leads').select('id, deal_id').in('deal_id', dealIds);
+    const { data: leads } = await supabase.from('website_leads').select('id, deal_id, email').in('deal_id', dealIds);
+    leadEmails.push(...(leads ?? []).map((l) => l.email));
     (leads ?? []).forEach((l) => {
       if (l.deal_id) leadCountByDeal.set(l.deal_id, (leadCountByDeal.get(l.deal_id) ?? 0) + 1);
     });
   }
+
+  // Mail is matched on the account's contacts and on leads linked to its deals.
+  const emailAddresses = outsideAddresses([...(contacts ?? []).map((c) => c.email), ...leadEmails]);
 
   return (
     <div>
@@ -45,6 +52,11 @@ export default async function AccountDetailPage({ params }: { params: Promise<{ 
 
       <h2 className="mb-3 mt-8 text-[15px] font-semibold text-ink">Deals</h2>
       <AccountDealsTable deals={deals ?? []} reps={reps ?? []} leadCountByDeal={leadCountByDeal} />
+
+      <h2 className="mb-3 mt-8 text-[15px] font-semibold text-ink">Email activity</h2>
+      <div className="card px-5 py-3">
+        <EmailTimeline emails={emailAddresses} />
+      </div>
     </div>
   );
 }

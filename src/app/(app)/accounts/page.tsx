@@ -1,3 +1,4 @@
+import { getLastContacts, latestContact, type LastContact } from '@/lib/email-activity';
 import { createClient } from '@/lib/supabase/server';
 import { isOpen } from '@/lib/opportunities';
 import type { Account, AccountContact, Deal, Rep } from '@/lib/types';
@@ -12,7 +13,10 @@ export default async function AccountsPage() {
   const [{ data: accounts }, { data: reps }, { data: contacts }, { data: deals }] = await Promise.all([
     supabase.from('accounts').select('*').order('name').returns<Account[]>(),
     supabase.from('reps').select('*').order('name').returns<Rep[]>(),
-    supabase.from('account_contacts').select('id, account_id').returns<Pick<AccountContact, 'id' | 'account_id'>[]>(),
+    supabase
+      .from('account_contacts')
+      .select('id, account_id, email')
+      .returns<Pick<AccountContact, 'id' | 'account_id' | 'email'>[]>(),
     supabase
       .from('deals')
       .select('id, account_id, value, stage, status')
@@ -44,6 +48,27 @@ export default async function AccountsPage() {
     }
   });
 
+  // Latest synced email per account, from its contacts and the leads linked to its deals.
+  const { data: linkedLeads } = await supabase
+    .from('website_leads')
+    .select('email, deals!inner(account_id)')
+    .not('deal_id', 'is', null)
+    .not('email', 'is', null)
+    .returns<{ email: string; deals: { account_id: string | null } }[]>();
+  const accountEmails: Record<string, (string | null)[]> = {};
+  (contacts ?? []).forEach((c) => (accountEmails[c.account_id] ??= []).push(c.email));
+  (linkedLeads ?? []).forEach((l) => {
+    if (l.deals.account_id) (accountEmails[l.deals.account_id] ??= []).push(l.email);
+  });
+  const lastContactMap = await getLastContacts(supabase, Object.values(accountEmails).flat());
+  const lastContactByAccount: Record<string, { contact: LastContact | null; emails: string[] }> = {};
+  Object.entries(accountEmails).forEach(([id, emails]) => {
+    lastContactByAccount[id] = {
+      contact: latestContact(lastContactMap, emails),
+      emails: emails.filter((e): e is string => !!e)
+    };
+  });
+
   const linkedDeals = (deals ?? []).filter((d) => d.account_id).length;
 
   return (
@@ -66,6 +91,7 @@ export default async function AccountsPage() {
         contactCounts={contactCounts}
         dealCounts={dealCounts}
         dealSummary={dealSummary}
+        lastContacts={lastContactByAccount}
       />
     </div>
   );

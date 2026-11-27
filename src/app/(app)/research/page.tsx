@@ -4,6 +4,7 @@ import { BreakdownBars } from '@/components/breakdown-bars';
 import { LeadsUploadForm } from '@/components/leads-upload-form';
 import { PageHeaderPanels } from '@/components/page-header-panels';
 import { chartClass } from '@/lib/pill-colors';
+import { getLastContacts } from '@/lib/email-activity';
 import { createClient } from '@/lib/supabase/server';
 import { LEAD_STATUSES, type Deal, type Lead, type Rep } from '@/lib/types';
 import { LeadsTable } from '../leads/table';
@@ -23,6 +24,7 @@ export default async function ResearchPage() {
   ]);
 
   const allLeads = leads ?? [];
+  const lastContacts = await getLastContacts(supabase, allLeads.map((l) => l.email));
   const dailyPoints = allLeads.map((l) => ({ date: l.created_at, value: 1 }));
   const statusBreakdown = LEAD_STATUSES.map((status) => ({
     label: status,
@@ -54,6 +56,7 @@ export default async function ResearchPage() {
       </div>
 
       <LeadsTable
+        lastContacts={lastContacts}
         leads={allLeads}
         reps={reps ?? []}
         deals={deals ?? []}

@@ -10,6 +10,8 @@ import { Pill } from '@/components/ui';
 import { formatUsd } from '@/lib/opportunities';
 import { ACCOUNT_KINDS, ACCOUNT_STATUSES, REGIONS, type Account, type Rep } from '@/lib/types';
 import { useHighlightRow } from '@/lib/use-highlight-row';
+import { LastContactCell } from '@/components/last-contact';
+import type { LastContact } from '@/lib/email-activity';
 
 function Cell({
   value,
@@ -45,13 +47,15 @@ export function AccountsTable({
   reps,
   contactCounts,
   dealCounts,
-  dealSummary
+  dealSummary,
+  lastContacts
 }: {
   accounts: Account[];
   reps: Rep[];
   contactCounts: Record<string, number>;
   dealCounts: Record<string, number>;
   dealSummary: Record<string, { open: number; openValue: number; stages: Record<string, number> }>;
+  lastContacts: Record<string, { contact: LastContact | null; emails: string[] }>;
 }) {
   const { rowProps } = useHighlightRow();
   const [search, setSearch] = useState('');
@@ -130,6 +134,7 @@ export function AccountsTable({
                 <th>Assigned Rep</th>
                 <th>Type</th>
                 <th>Status</th>
+                <th>Last contact</th>
                 <th>Open value</th>
                 <th>Stages</th>
                 <th>POCs</th>
@@ -193,6 +198,13 @@ export function AccountsTable({
                       onChange={(s) =>
                         updateAccount(account.id, { account_status: s === 'Unset' ? null : (s as Account['account_status']) })
                       }
+                    />
+                  </td>
+                  <td>
+                    <LastContactCell
+                      contact={lastContacts[account.id]?.contact ?? null}
+                      emails={lastContacts[account.id]?.emails ?? []}
+                      title={account.name}
                     />
                   </td>
                   <td className="whitespace-nowrap text-ink-3 tabular-nums">

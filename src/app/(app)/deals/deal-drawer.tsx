@@ -7,6 +7,7 @@ import {
   updateOpportunity,
   type OpportunityFields
 } from '@/app/actions';
+import { EmailTimeline } from '@/components/email-timeline';
 import {
   dealEconomics,
   dealTitle,
@@ -438,6 +439,11 @@ export function DealDrawer({
           rows={contacts.map((c) => [c.name, c.role])}
           onChange={(rows) => commitContacts(rows.map(([name, role]) => ({ name, role })))}
         />
+
+        <div className="sec">
+          <h3>Email</h3>
+          <EmailTimeline dealId={deal.id} />
+        </div>
 
         <div className="sec">
           <h3>Activity</h3>

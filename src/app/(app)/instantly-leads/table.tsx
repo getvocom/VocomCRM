@@ -7,6 +7,8 @@ import { deleteInstantlyLead, updateInstantlyLead } from '@/app/actions';
 import { DeleteButton } from '@/components/delete-button';
 import { RepSelect } from '@/components/rep-select';
 import { StatusSelect } from '@/components/status-select';
+import { LastContactCell } from '@/components/last-contact';
+import { latestContact, type LastContactMap } from '@/lib/email-activity';
 import type { InstantlyLead, Rep } from '@/lib/types';
 import { CAMPAIGN_STATUS_FILTERS, INTEREST_FILTERS, SEQUENCE_STATUS_FILTERS } from './constants';
 
@@ -104,6 +106,7 @@ interface Summary {
 }
 
 export function InstantlyLeadsTable({
+  lastContacts,
   leads,
   reps,
   statuses,
@@ -121,6 +124,8 @@ export function InstantlyLeadsTable({
   filterCounts,
   summary
 }: {
+  // Latest synced email (Gmail) per lowercase address.
+  lastContacts: LastContactMap;
   leads: InstantlyLead[];
   reps: Rep[];
   statuses: string[];
@@ -334,6 +339,7 @@ export function InstantlyLeadsTable({
                 <th>Campaign</th>
                 <th>Sequence</th>
                 <th>Last Activity</th>
+                <th>Last Email</th>
                 <th>Interest</th>
                 <th>Assigned Rep</th>
                 <th>Sales Status</th>
@@ -420,6 +426,18 @@ export function InstantlyLeadsTable({
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-ink-2">
                     {lead.last_reply_at ? new Date(lead.last_reply_at).toLocaleDateString() : '—'}
+                  </td>
+                  <td>
+                    {(() => {
+                      const emails = [lead.email, ...(lead.alternative_email?.split(/[,;\s]+/) ?? [])].filter(Boolean);
+                      return (
+                        <LastContactCell
+                          contact={latestContact(lastContacts, emails)}
+                          emails={emails}
+                          title={lead.name || lead.email}
+                        />
+                      );
+                    })()}
                   </td>
                   <td>
                     <span
